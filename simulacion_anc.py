@@ -50,6 +50,10 @@ T_MAX_BUFFER = 1e-3
 # (motores, cabina de avión) más un componente aleatorio de banda ancha.
 TONOS = [(100.0, 0.30), (250.0, 0.20), (500.0, 0.12)]   # (frecuencia Hz, amplitud Pa)
 RUIDO_BANDA_ANCHA = 0.02                                   # Pa rms
+# Nota: este valor es la escala de entrada del ruido aleatorio, no el valor eficaz final.
+# El filtro pasabajos de paso() (factor 0.02 por muestra) reduce el valor eficaz
+# por sqrt(0.02 / (2 - 0.02)) ≈ 0.1; con el factor 7 de paso() el ruido aleatorio
+# que llega al oído queda en ≈ 0.014 Pa rms.
 
 TIPOS_PERTURBACION = {
     "Escalón": "escalon",
@@ -178,6 +182,9 @@ class LazoANC:
             e = 0.0 - b                           # error, referencia nula [V]
             u = Kp * e if anc else 0.0            # ley de control proporcional [V]
             if anc and pre:
+                # Prealimentación ideal: usa la misma d que llega al oído y pasa por el
+                # mismo retardo que el anti-ruido. Con ff = 0.8 agrega 20·log(1/0.2) ≈ 14 dB.
+                # En un auricular real el micrófono externo tiene otro camino acústico.
                 u += -ff * d / Ka                 # anticipa la perturbación
             if abs(u) > umax:
                 u = umax if u > 0 else -umax
@@ -249,6 +256,8 @@ def ensayos(carpeta="."):
     for ax, T in zip(axs, [40e-6, 60e-6, 80e-6, 100e-6]):
         r, att = correr(LazoANC(Kp=Kp, T=T), 40e-3)
         lim = kp_limites(1.0, 1e-3, T)
+        # "estable" es la predicción analítica (Kp < Kp máx exacto), no una detección
+        # sobre la señal simulada. En la práctica ambas coinciden.
         estable = Kp < lim["kp_max_exacto"]
         ax.plot(r["t"] * ms, r["coff"], color="#9a9a9a", lw=0.8)
         ax.plot(r["t"] * ms, r["c"], color="#2f6db5" if estable else "#c0392b", lw=0.8)
@@ -571,6 +580,7 @@ def construir_interfaz():
         if not lazo.anc:
             estado, color = "ANC apagado", "#555555"
         elif lazo.Kp >= lim["kp_max_exacto"]:
+            # Predicción analítica a partir de los parámetros, no detección sobre la señal.
             estado, color = "INESTABLE", "#c0392b"
         elif est["saturado"]:
             estado, color = "Estable, saturado", "#d08c2b"
