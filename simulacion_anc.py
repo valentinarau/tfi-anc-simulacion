@@ -454,7 +454,7 @@ def construir_interfaz():
     r_tipo = RadioButtons(fig.add_axes([0.815, 0.775, 0.165, 0.145]), tuple(TIPOS_PERTURBACION))
     pert = {}
     for clave, etiqueta, inicial, yy in [("amp", "Amplitud [Pa]", "0.3", 0.725),
-                                         ("dur", "Duración [ms]", "5", 0.68),
+                                         ("dur", "Duración [ms]", "200", 0.68),
                                          ("f", "Frecuencia [Hz]", "200", 0.635)]:
         pert[clave] = TextBox(fig.add_axes([0.905, yy, 0.075, 0.032]), etiqueta + "  ", initial=inicial, **SIN_HOVER_TB)
     b_aplicar = Button(fig.add_axes([0.815, 0.575, 0.165, 0.042]), "Aplicar perturbación", **SIN_HOVER_B)
