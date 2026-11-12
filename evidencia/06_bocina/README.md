@@ -30,7 +30,7 @@ Lo que limita el resultado es la frecuencia de cada armónico, no la forma en el
   levemente. No hay saturación: la salida de control no supera 0,9 V, lejos del umbral de 3 V.
   La bocina se atenúa en forma parcial sin que el lazo falle.
 - **Sección 8.7, valores del simulador:** con buen calce, la atenuación durante la subida está
-  entre 16 y 17,5 dB según las fases de los armónicos, y con el sonido establecido es 16,7 dB.
+  entre 15,8 y 17,5 dB según las fases de los armónicos, y con el sonido establecido es 16,7 dB.
 - Con el sonido establecido, la atenuación total se puede calcular con |1 + GH(jω)| en cada
   armónico, pesando cada uno por lo que deja pasar el proceso (columna "Cálculo").
 

@@ -26,7 +26,7 @@ si la simulación da lo que predice el informe, también cuando lo predicho es u
 | 3. Pérdida de sello: después de aflojarse | 6.7, 8.6, 9.4 | Kp = 480 > 447: oscila (~6,4 kHz) y satura | Oscila a 6,35 kHz; saturado el 37 % del tiempo | Falla (oscila y satura). Buscada por el ensayo | Sí |
 | 4. Híbrido: con y sin prealimentación | 9.5 | Mejora de 14,0 dB; 9.5 reporta 24,7 → 38,7 dB | 24,7 → 38,7 dB (+14,0 dB) | Error admisible | Sí |
 | 5. Escalón de 0,5 Pa | 6.5, 8.3, 9.6 | c_ss = K·A/(1+KL) = 0,0211 Pa; sobrepico 41,5 %, asentamiento 0,43 ms | c_ss = 0,0211 Pa (4,2 % del escalón); sobrepico 41,5 %, 0,43 ms | Error admisible | Sí |
-| 6. Bocina de 420 Hz, 100 dB SPL | 8.7 | Subida 16 a 17,5 dB ≈ establecido 16,7 dB; fundamental 18 dB, 5.º armónico 4 dB, desde el 7.º amplifica; u ≤ 0,9 V | Subida 15,8 a 17,5 dB, establecido 16,7 dB; armónicos 18,4 / 3,8 / -0,3 dB; u máx. 0,87 V | Error admisible | Sí |
+| 6. Bocina de 420 Hz, 100 dB SPL | 8.7 | Subida 15,8 a 17,5 dB ≈ establecido 16,7 dB; fundamental 18 dB, 5.º armónico 4 dB, desde el 7.º amplifica; u ≤ 0,9 V | Subida 15,8 a 17,5 dB, establecido 16,7 dB; armónicos 18,4 / 3,8 / -0,3 dB; u máx. 0,87 V | Error admisible | Sí |
 
 Hay 2 situaciones de falla y son buscadas: los ensayos 2 y 3 existen para provocarlas.
 En todos los casos la simulación coincide con lo que predice el informe.

@@ -601,9 +601,9 @@ def caso_6(resumen):
     # Armónicos según 8.7: fundamental 18 dB, 2.º 13 dB, 5.º 4 dB; desde el 7.º amplifica.
     arm_ok = (round(arm[0]) == 18 and round(arm[1]) == 13 and round(arm[4]) == 4
               and arm[6] < 0 and arm[7] < 0 and arm[5] > 0)
-    # Valores que reporta el informe (8.7) para el buen calce: subida entre 16 y 17,5 dB
-    # (redondeado), establecido 16,7 dB y salida de control que no supera 0,9 V.
-    informe_ok = (round(min(sub_b)) >= 16 and round(max(sub_b), 1) <= 17.5
+    # Valores que reporta el informe (8.7) para el buen calce: subida entre 15,8 y 17,5 dB,
+    # establecido 16,7 dB y salida de control que no supera 0,9 V.
+    informe_ok = (round(min(sub_b), 1) == 15.8 and round(max(sub_b), 1) == 17.5
                   and round(est_b, 1) == 16.7 and umax_b <= 0.9)
     ok = filas_ok and arm_ok and informe_ok
     bb = atenuacion_banda_baja(Kp)
@@ -676,7 +676,7 @@ Lo que limita el resultado es la frecuencia de cada armónico, no la forma en el
   levemente. No hay saturación: la salida de control no supera 0,9 V, lejos del umbral de 3 V.
   La bocina se atenúa en forma parcial sin que el lazo falle.
 - **Sección 8.7, valores del simulador:** con buen calce, la atenuación durante la subida está
-  entre 16 y 17,5 dB según las fases de los armónicos, y con el sonido establecido es 16,7 dB.
+  entre 15,8 y 17,5 dB según las fases de los armónicos, y con el sonido establecido es 16,7 dB.
 - Con el sonido establecido, la atenuación total se puede calcular con |1 + GH(jω)| en cada
   armónico, pesando cada uno por lo que deja pasar el proceso (columna "Cálculo").
 
@@ -705,7 +705,7 @@ almohadilla.
 """
     fila_indice = [dict(
         caso="6. Bocina de 420 Hz, 100 dB SPL", seccion="8.7",
-        predice="Subida 16 a 17,5 dB ≈ establecido 16,7 dB; fundamental 18 dB, 5.º armónico 4 dB, "
+        predice="Subida 15,8 a 17,5 dB ≈ establecido 16,7 dB; fundamental 18 dB, 5.º armónico 4 dB, "
                 "desde el 7.º amplifica; u ≤ 0,9 V",
         dio=f"Subida {num(min(sub_b))} a {num(max(sub_b))} dB, establecido {num(est_b)} dB; "
             f"armónicos {num(arm[0])} / {num(arm[4])} / {num(arm[6])} dB; u máx. {num(umax_b, 2)} V",
