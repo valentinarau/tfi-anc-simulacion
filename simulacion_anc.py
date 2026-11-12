@@ -55,12 +55,24 @@ RUIDO_BANDA_ANCHA = 0.02                                   # Pa rms
 # por sqrt(0.02 / (2 - 0.02)) ≈ 0.1; con el factor 7 de paso() el ruido aleatorio
 # que llega al oído queda en ≈ 0.014 Pa rms.
 
+# Menú de perturbaciones: entre paréntesis, la dimensión cualitativa (forma) de cada una.
+# Orden: entradas de prueba, ruidos urbanos de la sección 8.7 del informe y cambio del proceso.
+# La ráfaga ("rafaga") salió del menú (la reemplaza el tránsito) pero su código sigue disponible.
 TIPOS_PERTURBACION = {
-    "Escalón": "escalon",
-    "Tono": "tono",
-    "Ráfaga (banda baja)": "rafaga",
-    "Pérdida de sello": "sello",
+    "Escalón (pulso rectangular)": "escalon",
+    "Tono (senoidal)": "tono",
+    "Bocina (rampa)": "bocina",
+    "Tránsito (aleatoria)": "transito",
+    "Colectivo (senoidal)": "colectivo",
+    "Pérdida de sello (parámetros)": "sello",
 }
+
+# Ruidos urbanos (sección 8.7 del informe). Las amplitudes relativas son supuestas (el informe no las fija).
+BOCINA_F0 = 420.0          # fundamental [Hz]; armónicos 2·f0 ... 8·f0 con amplitud 1/n
+BOCINA_SUBIDA = 5e-3       # tiempo de subida (y de bajada al terminar) [s]
+COLECTIVO = [(35.0, 1.0), (70.0, 0.7), (105.0, 0.5), (140.0, 0.35)]   # (Hz, amplitud relativa)
+TRANSITO_BANDAS = [(50.0, 100.0, 1.0), (800.0, 1250.0, 0.5)]           # (Hz mín, Hz máx, amplitud relativa)
+TRANSITO_TONOS_POR_BANDA = 20
 
 
 def kp_limites(K, tau, T, Ka=KA, Km=KM):
@@ -122,7 +134,9 @@ class LazoANC:
 
     # --- perturbaciones manuales --------------------------------------------
     def agregar_perturbacion(self, tipo, amplitud=0.0, duracion=5e-3, frecuencia=200.0):
-        """tipo: 'escalon', 'tono', 'rafaga' o 'sello'. Empieza en el instante actual."""
+        """tipo: 'escalon', 'tono', 'rafaga', 'bocina', 'transito', 'colectivo' o 'sello'.
+        Empieza en el instante actual. En ráfaga, bocina, tránsito y colectivo la amplitud
+        es el valor eficaz total."""
         p = {"tipo": tipo, "t0": self.t, "t1": self.t + duracion,
              "amp": amplitud, "f": frecuencia}
         if tipo == "rafaga":   # suma de tonos aleatorios entre 50 Hz y 1 kHz
@@ -130,6 +144,23 @@ class LazoANC:
             p["fs"] = self.rng.uniform(50, 1000, n)
             p["fases"] = self.rng.uniform(0, 2 * np.pi, n)
             p["a"] = amplitud * np.sqrt(2.0 / n)   # amplitud = valor eficaz de la ráfaga
+        elif tipo in ("bocina", "transito", "colectivo"):
+            # Suma de tonos: frecuencias y pesos relativos según el tipo, fases al azar.
+            if tipo == "bocina":
+                n = np.arange(1, 9)
+                fs, pesos = BOCINA_F0 * n, 1.0 / n
+            elif tipo == "colectivo":
+                fs = np.array([f for f, _ in COLECTIVO])
+                pesos = np.array([a for _, a in COLECTIVO])
+            else:   # tránsito: muchos tonos al azar dentro de cada banda -> ruido aleatorio
+                fs = np.concatenate([self.rng.uniform(lo, hi, TRANSITO_TONOS_POR_BANDA)
+                                     for lo, hi, _ in TRANSITO_BANDAS])
+                pesos = np.concatenate([np.full(TRANSITO_TONOS_POR_BANDA, a)
+                                        for _, _, a in TRANSITO_BANDAS])
+            p["fs"] = fs
+            p["fases"] = self.rng.uniform(0, 2 * np.pi, len(fs))
+            # Escala para que el valor eficaz total sea la amplitud pedida.
+            p["a_vec"] = amplitud * pesos * np.sqrt(2.0 / np.sum(pesos ** 2))
         self.perturbaciones.append(p)
         return p
 
@@ -147,6 +178,13 @@ class LazoANC:
                 dm[m] += p["amp"] * np.sin(2 * np.pi * p["f"] * tt)
             elif p["tipo"] == "rafaga":
                 dm[m] += np.sum(p["a"] * np.sin(2 * np.pi * p["fs"][:, None] * tt + p["fases"][:, None]), axis=0)
+            elif p["tipo"] in ("bocina", "transito", "colectivo"):
+                s = np.sum(p["a_vec"][:, None] * np.sin(2 * np.pi * p["fs"][:, None] * tt + p["fases"][:, None]), axis=0)
+                if p["tipo"] == "bocina":
+                    # Envolvente: sube en rampa durante 5 ms y baja igual al final (evita un "clic").
+                    resta = (p["t1"] - p["t0"]) - tt
+                    s *= np.clip(tt / BOCINA_SUBIDA, 0, 1) * np.clip(resta / BOCINA_SUBIDA, 0, 1)
+                dm[m] += s
             elif p["tipo"] == "sello":
                 sello |= m
         return dm, sello
@@ -461,13 +499,16 @@ def construir_interfaz():
 
     # ---- perturbación manual y simulación (columna B) --------------------
     fig.text(0.815, 0.935, "Perturbación manual", fontsize=11, weight="bold")
-    r_tipo = RadioButtons(fig.add_axes([0.815, 0.775, 0.165, 0.145]), tuple(TIPOS_PERTURBACION))
+    # Menú más alto (6 opciones); las cajas y el botón se corren hacia abajo para hacerle lugar.
+    r_tipo = RadioButtons(fig.add_axes([0.815, 0.725, 0.165, 0.195]), tuple(TIPOS_PERTURBACION))
+    for lbl in r_tipo.labels:
+        lbl.set_fontsize(9)   # los nombres con la forma entre paréntesis son más largos
     pert = {}
-    for clave, etiqueta, inicial, yy in [("amp", "Amplitud [Pa]", "0.3", 0.725),
-                                         ("dur", "Duración [ms]", "200", 0.68),
-                                         ("f", "Frecuencia [Hz]", "200", 0.635)]:
+    for clave, etiqueta, inicial, yy in [("amp", "Amplitud [Pa]", "0.3", 0.68),
+                                         ("dur", "Duración [ms]", "200", 0.64),
+                                         ("f", "Frecuencia [Hz]", "200", 0.60)]:
         pert[clave] = TextBox(fig.add_axes([0.905, yy, 0.075, 0.032]), etiqueta + "  ", initial=inicial, **SIN_HOVER_TB)
-    b_aplicar = Button(fig.add_axes([0.815, 0.575, 0.165, 0.042]), "Aplicar perturbación", **SIN_HOVER_B)
+    b_aplicar = Button(fig.add_axes([0.815, 0.552, 0.165, 0.04]), "Aplicar perturbación", **SIN_HOVER_B)
 
     def on_aplicar(_=None):
         etiqueta = r_tipo.value_selected
@@ -488,7 +529,10 @@ def construir_interfaz():
         lazo.agregar_perturbacion(tipo, amp, dur, f)
         detalle = {"escalon": f"{amp:g} Pa", "tono": f"{amp:g} Pa, {f:g} Hz",
                    "rafaga": f"{amp:g} Pa ef.",
-                   "sello": f"K={CALCE['malo']['K']}, τ={CALCE['malo']['tau']*1e3:g} ms"}[tipo]
+                   "bocina": f"{BOCINA_F0:g} Hz, {amp:g} Pa ef.",
+                   "transito": f"{amp:g} Pa ef.",
+                   "colectivo": f"{COLECTIVO[0][0]:g} Hz, {amp:g} Pa ef.",
+                   "sello":f"K={CALCE['malo']['K']}, τ={CALCE['malo']['tau']*1e3:g} ms"}[tipo]
         sufijo = " (arranca al reanudar)" if est["pausa"] else ""
         avisar(f"Perturbación aplicada en t = {lazo.t*1e3:.1f} ms: {etiqueta}, {detalle}, {dur*1e3:g} ms{sufijo}")
     b_aplicar.on_clicked(on_aplicar)
