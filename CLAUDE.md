@@ -45,6 +45,12 @@ bloques del lazo). Las figuras se renumeraron: los diagramas en bloques pasaron 
 y los ensayos de la sección 9 son las figuras 4 a 8. Kp = 150 y 450 aclarados como fuera de la ventana
 (8.3, 8.7, 9.2); sobrepico 41,5 % (6.5).
 
+Actualización (12/11/2026, 4): sección 10 reescrita por pedido del profesor ("relación profunda con IoT:
+dónde aparece, qué elementos usar e incorporar, si conviene"): 10.1 capas IoT del producto (verificado con
+documentación de Apple), 10.2 propuesta de variables a informar, 10.3 por qué IoT no va dentro del lazo
+(latencia BLE ≥ 375 µs frente a T = 40 µs), 10.4 garantizar/asegurar. Pérdida de sello = perturbación
+intermedia (interpretación nuestra); ruido ambiente = externa. Scan = Tm, no publicado, incluido en T.
+
 ## Vocabulario del profesor
 
 - Proporcional por umbral: acción proporcional dentro de una banda delimitada por umbrales.
