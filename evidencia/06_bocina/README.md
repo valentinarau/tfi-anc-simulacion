@@ -24,17 +24,19 @@ Lo que limita el resultado es la frecuencia de cada armónico, no la forma en el
 
 ## 3. Qué predice el informe
 
-- **Sección 8.7:** la atenuación durante la subida es prácticamente la misma que con el sonido
-  establecido; la fundamental se atenúa unos 18 dB, el segundo armónico (840 Hz) unos 13 dB y
-  el quinto (2,1 kHz) unos 4 dB; desde el séptimo armónico (unos 2,9 kHz) el lazo amplifica
-  levemente. No hay saturación: la salida de control no supera 0,9 V, lejos del umbral de 3 V.
-  La bocina se atenúa en forma parcial sin que el lazo falle.
-- **Sección 8.7, valores del simulador:** con buen calce, la atenuación durante la subida está
-  entre 15,8 y 17,5 dB según las fases de los armónicos, y con el sonido establecido es 16,7 dB.
-- Con el sonido establecido, la atenuación total se puede calcular con |1 + GH(jω)| en cada
-  armónico, pesando cada uno por lo que deja pasar el proceso (columna "Cálculo").
+- **Tabla 10 (sección 8.7):** con Kp = 300 y buen calce, la bocina se atenúa 18 dB en la
+  fundamental y 16,7 dB en total; no cumple los 20 dB.
+- **Sección 8.7:** como el lazo se asienta en 0,43 ms, la atenúa casi igual desde el comienzo.
+  El límite es la frecuencia: la fundamental baja 18 dB, pero los armónicos agudos casi nada.
+  El parlante no satura.
+- **Sección 8.3:** con Kp = 300, por encima de unos 2,9 kHz el lazo amplifica el ruido en lugar
+  de atenuarlo; en la bocina, eso alcanza al 7.º armónico (2,94 kHz) y al 8.º.
 
 ## 4. Qué dio la simulación
+
+Además de la simulación, la columna "Cálculo" da la atenuación con el sonido establecido
+calculando el factor 1 + GH en la frecuencia de cada armónico, pesado por lo que deja pasar el
+proceso.
 
 | Calce | Durante la subida (5 semillas) | Sonido establecido | Cálculo | Salida de control máx. |
 |---|---|---|---|---|

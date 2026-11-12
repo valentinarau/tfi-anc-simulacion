@@ -2,15 +2,15 @@
 
 ![Figura del ensayo 5](figura.png)
 
-*Es la figura 7 del informe (sección 9.6).*
+*Es la figura 8 del informe (sección 9.6).*
 
 ## 1. Qué se prueba y por qué
 
 Se prueba la fórmula del **error en estado estable** de la sección 8.3, obtenida con el
 teorema del valor final. El lazo es de tipo 0 (no tiene polos en el origen), así que ante una
 perturbación escalón el error no se anula: queda un valor finito, K·A/(1 + KL), que es más
-chico cuanto más grande es KL. También se prueba la forma de la respuesta: con el retardo, el
-lazo responde como un sistema subamortiguado, con sobrepico.
+chico cuanto más grande es KL. También se prueba la forma de la respuesta: con el retardo, la
+presión pasa su valor final antes de asentarse (sobrepico).
 
 ## 2. Parámetros usados
 
@@ -25,9 +25,8 @@ lazo responde como un sistema subamortiguado, con sobrepico.
 
 - **Sección 8.3:** sin ANC la presión tiende a K·A = 0,5 Pa; con ANC, a
   K·A/(1 + KL) = **0,0211 Pa**. No se anula porque el sistema es de tipo 0.
-- **Sección 6.5:** con el retardo la respuesta es subamortiguada (coeficiente de
-  amortiguamiento 0,41 con la aproximación de Padé). Reporta que en este ensayo la presión
-  supera en un 41,5 % su valor final y se asienta dentro del 2 % en unos 0,43 ms.
+- **Sección 8.6:** con Kp = 300 y buen calce, la presión residual sobrepasa su valor final
+  en un 41,5 % y se asienta dentro del 2 % en unos 0,43 ms (ensayo 5).
 - **Sección 9.6** reporta 0,0211 Pa.
 
 ## 4. Qué dio la simulación
@@ -37,8 +36,8 @@ lazo responde como un sistema subamortiguado, con sobrepico.
 | Valor final sin ANC | 0,5000 Pa | 0,5000 Pa |
 | Valor final con ANC (c_ss) | 0,0211 Pa | 0,0211 Pa |
 | Residuo respecto de sin ANC | 4,2 % | 4,2 % |
-| Sobrepico | 41,5 % (6.5) | 41,5 % |
-| Tiempo de asentamiento (2 %) | 0,43 ms (6.5) | 0,434 ms |
+| Sobrepico | 41,5 % (8.6) | 41,5 % |
+| Tiempo de asentamiento (2 %) | 0,43 ms (8.6) | 0,434 ms |
 
 ¿Coincide con la predicción? **Sí**.
 

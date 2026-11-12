@@ -2,7 +2,7 @@
 
 ![Figura del ensayo 2](figura.png)
 
-*Es la figura 4 del informe (sección 9.3).*
+*Es la figura 5 del informe (sección 9.3).*
 
 ## 1. Qué se prueba y por qué
 

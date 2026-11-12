@@ -2,7 +2,7 @@
 
 ![Figura del ensayo 3](figura.png)
 
-*Es la figura 5 del informe (sección 9.4).*
+*Es la figura 6 del informe (sección 9.4).*
 
 ## 1. Qué se prueba y por qué
 
@@ -21,9 +21,10 @@ el caso en que la aproximación de Padé daría el lazo por estable cuando no lo
 
 ## 3. Qué predice el informe
 
-- **Sección 8.6:** con buen calce, Kp = 480 es estable (Kp máx exacto 528) y da
-  unos 31 dB de atenuación estática. Con mal calce, el Kp máximo exacto baja a 447 y el lazo
-  oscila en torno a 6,4 kHz, aunque Padé lo daría por estable (Kp máx Padé 573).
+- **Sección 8.6:** el caso Kp = 480 muestra por qué la ventana se evalúa con el peor calce:
+  Padé lo daría por estable (Kp máx Padé 573), pero con mal calce supera el
+  límite exacto de 447 y el lazo oscila a unos 6,4 kHz. Con buen calce el límite exacto es
+  528 (Tabla 9), así que antes de aflojarse el lazo es estable.
 - **Sección 6.7:** la oscilación y la saturación sostenida son falla; la pérdida de sello es
   perturbación si es momentánea y falla si persiste.
 - **Sección 9.4** reporta 28,6 dB con buen calce y, al aflojarse, oscilación con la salida

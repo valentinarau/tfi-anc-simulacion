@@ -3,7 +3,7 @@ Genera la carpeta evidencia/: un caso por ensayo, con su gráfico y su explicaci
 El caso 06 (bocina, sección 8.7) no es un ensayo de la sección 9: dibuja su propia figura.
 
 Usa simulacion_anc.py sin modificarlo:
-  - los gráficos son los mismos que produce `simulacion_anc.py --ensayos` (figuras 3 a 7 del informe);
+  - los gráficos son los mismos que produce `simulacion_anc.py --ensayos` (figuras 4 a 8 del informe);
   - los números se recalculan acá con la misma configuración de cada ensayo, y se controla que
     coincidan con los que informa ensayos(). Si alguien cambia un ensayo y dejan de coincidir,
     el script se detiene en lugar de generar evidencia desactualizada.
@@ -166,7 +166,7 @@ def caso_1(resumen):
 
 ![Figura del ensayo 1](figura.png)
 
-*Es la figura 3 del informe (sección 9.2).*
+*Es la figura 4 del informe (sección 9.2).*
 
 ## 1. Qué se prueba y por qué
 
@@ -249,7 +249,7 @@ def caso_2(resumen):
 
 ![Figura del ensayo 2](figura.png)
 
-*Es la figura 4 del informe (sección 9.3).*
+*Es la figura 5 del informe (sección 9.3).*
 
 ## 1. Qué se prueba y por qué
 
@@ -331,7 +331,7 @@ def caso_3(resumen):
 
 ![Figura del ensayo 3](figura.png)
 
-*Es la figura 5 del informe (sección 9.4).*
+*Es la figura 6 del informe (sección 9.4).*
 
 ## 1. Qué se prueba y por qué
 
@@ -350,9 +350,10 @@ el caso en que la aproximación de Padé daría el lazo por estable cuando no lo
 
 ## 3. Qué predice el informe
 
-- **Sección 8.6:** con buen calce, Kp = 480 es estable (Kp máx exacto {num(lim_bueno['kp_max_exacto'], 0)}) y da
-  unos 31 dB de atenuación estática. Con mal calce, el Kp máximo exacto baja a 447 y el lazo
-  oscila en torno a 6,4 kHz, aunque Padé lo daría por estable (Kp máx Padé {num(lim_malo['kp_max_pade'], 0)}).
+- **Sección 8.6:** el caso Kp = 480 muestra por qué la ventana se evalúa con el peor calce:
+  Padé lo daría por estable (Kp máx Padé {num(lim_malo['kp_max_pade'], 0)}), pero con mal calce supera el
+  límite exacto de 447 y el lazo oscila a unos 6,4 kHz. Con buen calce el límite exacto es
+  {num(lim_bueno['kp_max_exacto'], 0)} (Tabla 9), así que antes de aflojarse el lazo es estable.
 - **Sección 6.7:** la oscilación y la saturación sostenida son falla; la pérdida de sello es
   perturbación si es momentánea y falla si persiste.
 - **Sección 9.4** reporta 28,6 dB con buen calce y, al aflojarse, oscilación con la salida
@@ -402,7 +403,7 @@ def caso_4(resumen):
 
 ![Figura del ensayo 4](figura.png)
 
-*Es la figura 6 del informe (sección 9.5).*
+*Es la figura 7 del informe (sección 9.5).*
 
 ## 1. Qué se prueba y por qué
 
@@ -461,14 +462,14 @@ def caso_5(resumen):
     css_sim = float(np.mean(r["c"][m]))
     controlar("Ensayo 5", [round(css_teo, 4), round(css_sim, 4)], numeros_de(resumen, "Ensayo 5")[1:])
 
-    # Respuesta al escalón: sobrepico y tiempo de asentamiento al 2 % (sección 6.5)
+    # Respuesta al escalón: sobrepico y tiempo de asentamiento al 2 % (sección 8.6)
     me = (r["t"] >= 2e-3) & (r["t"] < 17e-3)
     c, t = r["c"][me], r["t"][me] - 2e-3
     sobrepico = (c.max() - css_sim) / css_sim
     fuera = np.nonzero(np.abs(c - css_sim) > 0.02 * css_sim)[0]
     t_asent = float(t[fuera[-1] + 1])
     residuo = css_sim / (K * A)
-    # El informe (6.5) da el sobrepico con un decimal: 41,5 %.
+    # El informe (8.6) da el sobrepico con un decimal: 41,5 %.
     ok = (round(css_sim, 4) == round(css_teo, 4) == 0.0211 and round(100 * sobrepico, 1) == 41.5
           and round(1e3 * t_asent, 2) == 0.43)
     v = veredicto(False, False, -20 * np.log10(residuo))
@@ -477,15 +478,15 @@ def caso_5(resumen):
 
 ![Figura del ensayo 5](figura.png)
 
-*Es la figura 7 del informe (sección 9.6).*
+*Es la figura 8 del informe (sección 9.6).*
 
 ## 1. Qué se prueba y por qué
 
 Se prueba la fórmula del **error en estado estable** de la sección 8.3, obtenida con el
 teorema del valor final. El lazo es de tipo 0 (no tiene polos en el origen), así que ante una
 perturbación escalón el error no se anula: queda un valor finito, K·A/(1 + KL), que es más
-chico cuanto más grande es KL. También se prueba la forma de la respuesta: con el retardo, el
-lazo responde como un sistema subamortiguado, con sobrepico.
+chico cuanto más grande es KL. También se prueba la forma de la respuesta: con el retardo, la
+presión pasa su valor final antes de asentarse (sobrepico).
 
 ## 2. Parámetros usados
 
@@ -500,9 +501,8 @@ lazo responde como un sistema subamortiguado, con sobrepico.
 
 - **Sección 8.3:** sin ANC la presión tiende a K·A = {num(K * A)} Pa; con ANC, a
   K·A/(1 + KL) = **{num(css_teo, 4)} Pa**. No se anula porque el sistema es de tipo 0.
-- **Sección 6.5:** con el retardo la respuesta es subamortiguada (coeficiente de
-  amortiguamiento 0,41 con la aproximación de Padé). Reporta que en este ensayo la presión
-  supera en un 41,5 % su valor final y se asienta dentro del 2 % en unos 0,43 ms.
+- **Sección 8.6:** con Kp = 300 y buen calce, la presión residual sobrepasa su valor final
+  en un 41,5 % y se asienta dentro del 2 % en unos 0,43 ms (ensayo 5).
 - **Sección 9.6** reporta 0,0211 Pa.
 
 ## 4. Qué dio la simulación
@@ -512,8 +512,8 @@ lazo responde como un sistema subamortiguado, con sobrepico.
 | Valor final sin ANC | {num(K * A, 4)} Pa | {num(float(np.mean(r['coff'][m])), 4)} Pa |
 | Valor final con ANC (c_ss) | {num(css_teo, 4)} Pa | {num(css_sim, 4)} Pa |
 | Residuo respecto de sin ANC | {num(100 / (1 + KL), 1)} % | {num(100 * residuo, 1)} % |
-| Sobrepico | 41,5 % (6.5) | {num(100 * sobrepico, 1)} % |
-| Tiempo de asentamiento (2 %) | 0,43 ms (6.5) | {num(1e3 * t_asent, 3)} ms |
+| Sobrepico | 41,5 % (8.6) | {num(100 * sobrepico, 1)} % |
+| Tiempo de asentamiento (2 %) | 0,43 ms (8.6) | {num(1e3 * t_asent, 3)} ms |
 
 ¿Coincide con la predicción? **{si_no(ok)}**.
 
@@ -524,7 +524,7 @@ la meta de 20 dB (como máximo la décima parte, sección 6.7). Que el error no 
 falla: es el error en estado estable propio de un sistema de tipo 0 con acción proporcional.
 """
     fila_indice = [dict(
-        caso="5. Escalón de 0,5 Pa", seccion="6.5, 8.3, 9.6",
+        caso="5. Escalón de 0,5 Pa", seccion="8.3, 8.6, 9.6",
         predice=f"c_ss = K·A/(1+KL) = {num(css_teo, 4)} Pa; sobrepico 41,5 %, asentamiento 0,43 ms",
         dio=f"c_ss = {num(css_sim, 4)} Pa ({num(100 * residuo, 1)} % del escalón); sobrepico {num(100 * sobrepico, 1)} %, {num(1e3 * t_asent, 2)} ms",
         veredicto=v, coincide=ok)]
@@ -572,7 +572,8 @@ def caso_6(resumen):
     r0, m0 = corridas["bueno"][0]
     arm = atenuacion_armonicos(r0, m0["est"])
 
-    # Atenuación esperada con el sonido establecido, calculada con |1 + GH(jω)| y el pasabajos
+    # Atenuación esperada con el sonido establecido, calculada con el factor 1 + GH en la
+    # frecuencia de cada armónico (|1 + GH(jω)|) y el pasabajos
     # del proceso (que ya filtra los armónicos agudos antes de llegar al oído).
     def establecido_teo(K, tau):
         n = np.arange(1, 9)
@@ -590,21 +591,22 @@ def caso_6(resumen):
         teo = establecido_teo(sim.CALCE[calce]["K"], sim.CALCE[calce]["tau"])
         tabla.append(f"| {nombre} | {num(min(sub))} a {num(max(sub))} dB | {num(np.mean(est))} dB "
                      f"| {num(teo)} dB | {num(min(um), 2)} a {num(max(um), 2)} V |")
-        # Predicciones de 8.7: la subida se atenúa casi igual que el establecido (diferencia
-        # menor a 2 dB) y no hay saturación. El establecido coincide con el cálculo.
+        # Predicciones de 8.7: "la atenúa casi igual desde el comienzo" (se toma como diferencia
+        # menor a 2 dB entre la subida y el establecido) y "el parlante no satura".
+        # Además, el establecido coincide con el cálculo.
         filas_ok &= (max(abs(s - e) for s, e in zip(sub, est)) < 2.0 and max(um) < sim.U_MAX
                      and abs(np.mean(est) - teo) < 0.1)
     sub_b = [m["subida"] for _, m in corridas["bueno"]]
     est_b = float(np.mean([m["establecido"] for _, m in corridas["bueno"]]))
     umax_b = max(m["umax"] for _, m in corridas["bueno"])
 
-    # Armónicos según 8.7: fundamental 18 dB, 2.º 13 dB, 5.º 4 dB; desde el 7.º amplifica.
-    arm_ok = (round(arm[0]) == 18 and round(arm[1]) == 13 and round(arm[4]) == 4
-              and arm[6] < 0 and arm[7] < 0 and arm[5] > 0)
-    # Valores que reporta el informe (8.7) para el buen calce: subida entre 15,8 y 17,5 dB,
-    # establecido 16,7 dB y salida de control que no supera 0,9 V.
-    informe_ok = (round(min(sub_b), 1) == 15.8 and round(max(sub_b), 1) == 17.5
-                  and round(est_b, 1) == 16.7 and umax_b <= 0.9)
+    # Armónicos: fundamental 18 dB (Tabla 10); los agudos casi nada (8.7; desde el 5.º, menos
+    # de 5 dB); por encima de unos 2,9 kHz el lazo amplifica (8.3): el 6.º (2,52 kHz) todavía
+    # atenúa y el 7.º (2,94 kHz) y el 8.º ya amplifican.
+    arm_ok = (round(arm[0]) == 18 and all(a < 5 for a in arm[4:])
+              and arm[5] > 0 and arm[6] < 0 and arm[7] < 0)
+    # Total con buen calce según la Tabla 10: 16,7 dB.
+    informe_ok = round(est_b, 1) == 16.7
     ok = filas_ok and arm_ok and informe_ok
     bb = atenuacion_banda_baja(Kp)
     v = veredicto(False, umax_b >= sim.U_MAX, bb)
@@ -670,17 +672,19 @@ Lo que limita el resultado es la frecuencia de cada armónico, no la forma en el
 
 ## 3. Qué predice el informe
 
-- **Sección 8.7:** la atenuación durante la subida es prácticamente la misma que con el sonido
-  establecido; la fundamental se atenúa unos 18 dB, el segundo armónico (840 Hz) unos 13 dB y
-  el quinto (2,1 kHz) unos 4 dB; desde el séptimo armónico (unos 2,9 kHz) el lazo amplifica
-  levemente. No hay saturación: la salida de control no supera 0,9 V, lejos del umbral de 3 V.
-  La bocina se atenúa en forma parcial sin que el lazo falle.
-- **Sección 8.7, valores del simulador:** con buen calce, la atenuación durante la subida está
-  entre 15,8 y 17,5 dB según las fases de los armónicos, y con el sonido establecido es 16,7 dB.
-- Con el sonido establecido, la atenuación total se puede calcular con |1 + GH(jω)| en cada
-  armónico, pesando cada uno por lo que deja pasar el proceso (columna "Cálculo").
+- **Tabla 10 (sección 8.7):** con Kp = 300 y buen calce, la bocina se atenúa 18 dB en la
+  fundamental y 16,7 dB en total; no cumple los 20 dB.
+- **Sección 8.7:** como el lazo se asienta en 0,43 ms, la atenúa casi igual desde el comienzo.
+  El límite es la frecuencia: la fundamental baja 18 dB, pero los armónicos agudos casi nada.
+  El parlante no satura.
+- **Sección 8.3:** con Kp = 300, por encima de unos 2,9 kHz el lazo amplifica el ruido en lugar
+  de atenuarlo; en la bocina, eso alcanza al 7.º armónico (2,94 kHz) y al 8.º.
 
 ## 4. Qué dio la simulación
+
+Además de la simulación, la columna "Cálculo" da la atenuación con el sonido establecido
+calculando el factor 1 + GH en la frecuencia de cada armónico, pesado por lo que deja pasar el
+proceso.
 
 | Calce | Durante la subida (5 semillas) | Sonido establecido | Cálculo | Salida de control máx. |
 |---|---|---|---|---|
@@ -704,11 +708,11 @@ del lazo (la meta se fija para la banda baja, sección 6.7); los armónicos agud
 almohadilla.
 """
     fila_indice = [dict(
-        caso="6. Bocina de 420 Hz, 100 dB SPL", seccion="8.7",
-        predice="Subida 15,8 a 17,5 dB ≈ establecido 16,7 dB; fundamental 18 dB, 5.º armónico 4 dB, "
-                "desde el 7.º amplifica; u ≤ 0,9 V",
+        caso="6. Bocina de 420 Hz, 100 dB SPL", seccion="8.3, 8.7",
+        predice="18 dB en la fundamental, 16,7 dB en total (Tabla 10); casi igual desde el comienzo, "
+                "agudos casi nada, sin saturar (8.7); amplifica sobre 2,9 kHz (8.3)",
         dio=f"Subida {num(min(sub_b))} a {num(max(sub_b))} dB, establecido {num(est_b)} dB; "
-            f"armónicos {num(arm[0])} / {num(arm[4])} / {num(arm[6])} dB; u máx. {num(umax_b, 2)} V",
+            f"fundamental {num(arm[0])} dB, 5.º {num(arm[4])} dB, 7.º {num(arm[6])} dB; u máx. {num(umax_b, 2)} V",
         veredicto=v, coincide=ok)]
     return readme, fila_indice
 
