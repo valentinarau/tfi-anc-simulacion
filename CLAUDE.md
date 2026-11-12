@@ -40,6 +40,11 @@ componente constante), sección nueva 8.7 (tránsito sostenido, bocina, colectiv
 9.1 actualizada con la cámara lenta y los valores eficaces de la interfaz, 6 entradas nuevas
 en la bibliografía.
 
+Actualización (12/11/2026, 3): nueva Figura 1 en la sección 3 (corte del auricular rotulado con los
+bloques del lazo). Las figuras se renumeraron: los diagramas en bloques pasaron a ser las figuras 2 y 3,
+y los ensayos de la sección 9 son las figuras 4 a 8. Kp = 150 y 450 aclarados como fuera de la ventana
+(8.3, 8.7, 9.2); sobrepico 41,5 % (6.5).
+
 ## Vocabulario del profesor
 
 - Proporcional por umbral: acción proporcional dentro de una banda delimitada por umbrales.
