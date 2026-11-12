@@ -573,6 +573,8 @@ def construir_interfaz():
     animados_graficos = [l_off, l_on, l_dm, l_u, l_umax, l_umin, l_e, *cursores]
 
     def blit(con_tabla=True):
+        if not hasattr(fig.canvas, "restore_region"):
+            return   # la ventana ya se cerró: matplotlib dejó un lienzo que no dibuja
         if fondo["img"] is None:
             fig.canvas.draw_idle()
             return
@@ -731,6 +733,9 @@ def construir_interfaz():
     timer.add_callback(tick)
     timer.start()
     fig._timer = timer
+    # Al cerrar la ventana se frena el temporizador; si no, puede disparar un cuadro más sobre
+    # una ventana que ya no existe y mostrar un error en la terminal.
+    fig.canvas.mpl_connect("close_event", lambda _: timer.stop())
     fig._widgets = [r_calce, r_tipo, c_ops, b_aplicar, b_pausa, b_reset, *cajas.values(), *pert.values()]
     return {"fig": fig, "lazo": lazo, "hist": hist, "est": est, "actualizar": tick,
             "on_pausa": on_pausa, "on_aplicar": on_aplicar, "on_reset": on_reset, "on_click": on_click,
