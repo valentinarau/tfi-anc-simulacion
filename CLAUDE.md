@@ -60,3 +60,11 @@ intermedia (interpretación nuestra); ruido ambiente = externa. Scan = Tm, no pu
   (sensibilidad); intermedias y externas = del contexto.
 - Scan = ciclo operativo. Un impulso que dura un scan se considera escalón.
 - Error en estado estable ≠ tolerancia (desvío de fabricación del componente).
+
+Actualización (12/11/2026, 5): revisión de redacción aplicada al informe (respaldo previo en Drive:
+"TFI_ANC (respaldo 12-11 antes de la revisión de redacción)"). Tablas nuevas: 5 (leyes de control, 7.1),
+7 (atenuación por frecuencia con Kp = 300 y 450, 8.3), 10 (ruidos urbanos, 8.7), 11 (interfaz, 9.1) y
+12 (síntesis de ensayos, sección nueva 9.7). Las viejas 5, 6 y 7 pasaron a ser 6, 8 y 9. Caso nominal
+unificado en Kp = 300 (8.3, 8.7, conclusión: ~11 dB a 1 kHz, amplifica desde ~2,9 kHz). Planitud del
+micrófono por debajo de 50 Hz tratada igual en 6.1 y 8.7. En 10.2 la decisión de ganancia queda en el
+auricular (la red no baja Kp). Mapa de ítems de la consigna al inicio de la sección 6.
