@@ -338,11 +338,15 @@ def construir_interfaz():
     import matplotlib.pyplot as plt
     from matplotlib.widgets import TextBox, RadioButtons, CheckButtons, Button
     from matplotlib.patches import Rectangle
+    import time
 
     VENTANA = 20e-3          # tiempo visible en pantalla [s]
-    POR_CUADRO = 2e-3        # tiempo simulado por cuadro [s]
+    POR_CUADRO = 0.5e-3      # tiempo simulado por cuadro [s] (cámara lenta: la ventana se recorre en ~1,2 s)
     INTERVALO_MS = 30        # cada cuánto se actualiza la pantalla [ms]
     DEC = 5                  # se dibuja 1 de cada 5 muestras (la tabla usa todas)
+    REFRESCO_TABLA = 0.5     # cada cuánto se reescriben los números de la tabla [s reales]
+    # Escribir el texto de la tabla es lo más costoso de cada cuadro; hacerlo en todos los
+    # cuadros dejaba los números ilegibles y sin tiempo libre para atender los clics.
 
     # Sin resaltado al pasar el mouse: matplotlib redibuja la ventana entera en cada
     # entrada/salida del puntero, y eso producía saltos en la animación.
@@ -353,7 +357,7 @@ def construir_interfaz():
     n_ven = int(VENTANA / DT)
     claves = ("t", "d", "dm", "coff", "c", "b", "e", "u")
     hist = {k: np.zeros(n_ven) for k in claves}
-    est = {"pausa": False, "cursor": None, "saturado": False, "sucio": True}
+    est = {"pausa": False, "cursor": None, "saturado": False, "sucio": True, "t_tabla": 0.0}
 
     fig = plt.figure(figsize=(16, 9.5))
     try:
@@ -505,6 +509,10 @@ def construir_interfaz():
         ("Error  e = R − b", "e", "mV"),
         ("Salida de control", "u", "V"),
         ("Presión del parlante", "Ka·u", "Pa"),
+        # Valores eficaces: misma media ventana (últimos 10 ms) que la atenuación medida
+        ("Presión sin ANC, valor eficaz", "c₀ ef", "Pa"),
+        ("Presión con ANC, valor eficaz", "c ef", "Pa"),
+        ("Salida de control, valor eficaz", "u ef", "V"),
         ("Condición del proceso", "K, τ", ""),
         ("Ganancia estática de lazo", "KL", "—"),
         ("Kp mínimo para 20 dB", "", "V/V"),
@@ -518,7 +526,7 @@ def construir_interfaz():
     h = 1.0 / n_f
     xs = (0.0, 0.48, 0.60, 0.86, 1.0)
     for i in range(n_f):
-        cara = "#e8e8e8" if i == 0 else ("#f6f6f6" if i > 9 else "white")
+        cara = "#e8e8e8" if i == 0 else ("#f6f6f6" if i > 12 else "white")
         ax_t.add_patch(Rectangle((0, 1 - (i + 1) * h), 1, h, facecolor=cara, edgecolor="#cccccc", lw=0.6))
     ax_t.vlines(xs[1:-1], 0, 1, colors="#cccccc", lw=0.6)
     yc = [1 - (i + 0.5) * h for i in range(n_f)]
@@ -551,9 +559,21 @@ def construir_interfaz():
         tabla_zona = TransformedBbox(Bbox.from_extents(0.645, 0.03, 0.99, 0.385), fig.transFigure)
         return [ax.bbox for ax in ejes] + [tabla_zona]
 
-    def blit():
+    animados_graficos = [l_off, l_on, l_dm, l_u, l_umax, l_umin, l_e, *cursores]
+
+    def blit(con_tabla=True):
         if fondo["img"] is None:
             fig.canvas.draw_idle()
+            return
+        if not con_tabla:
+            # Solo los gráficos: la tabla queda dibujada como estaba en el cuadro anterior.
+            cajas_ejes = [ax.bbox.padded(2) for ax in ejes]
+            for z in cajas_ejes:
+                fig.canvas.restore_region(fondo["img"], bbox=z, xy=(0, 0))  # xy = origen del fondo guardado (figura entera)
+            for a in animados_graficos:
+                fig.draw_artist(a)
+            for z in cajas_ejes:
+                fig.canvas.blit(z)
             return
         fig.canvas.restore_region(fondo["img"])
         for a in animados:
@@ -569,9 +589,12 @@ def construir_interfaz():
         KL = lazo.Kp * lim["G"]
         att = atenuacion_db(hist["coff"][n_ven // 2:], hist["c"][n_ven // 2:]) if lazo.anc else np.nan
         sello = " (sello perdido)" if (K, tau) != (lazo.K, lazo.tau) else ""
+        ef = {k: np.sqrt(np.mean(hist[k][n_ven // 2:] ** 2)) for k in ("coff", "c", "u")}
         textos = [f"{v['t']*1e3:.3f}", f"{v['d']:+.4f}", f"{v['dm']:+.4f}", f"{v['coff']:+.4f}",
                   f"{v['c']:+.4f}", f"{v['b']*1e3:+.3f}", f"{v['e']*1e3:+.3f}", f"{v['u']:+.4f}",
-                  f"{lazo.Ka*v['u']:+.4f}", f"{K:g}; {tau*1e3:g} ms{sello}", f"{KL:.2f}",
+                  f"{lazo.Ka*v['u']:+.4f}",
+                  f"{ef['coff']:.4f}", f"{ef['c']:.4f}", f"{ef['u']:.4f}",
+                  f"{K:g}; {tau*1e3:g} ms{sello}", f"{KL:.2f}",
                   f"{lim['kp_min20']:.0f}", f"{lim['kp_min30']:.0f}", f"{lim['kp_max_pade']:.0f}",
                   f"{lim['kp_max_exacto']:.0f}", "—" if np.isnan(att) else f"{att:.1f}"]
         for txt_art, txt in zip(valores_txt, textos):
@@ -592,7 +615,7 @@ def construir_interfaz():
         if est["pausa"]:
             titulo_tabla.set_text(f"EN PAUSA · valores en t = {v['t']*1e3:.3f} ms (clic en un gráfico para mover el cursor)")
         else:
-            titulo_tabla.set_text("Valores instantáneos (último instante simulado)")
+            titulo_tabla.set_text("Valores instantáneos (último instante simulado, se actualizan cada 0,5 s)")
 
     def actualizar_lineas():
         x = (hist["t"][::DEC] - hist["t"][-1]) * 1e3
@@ -618,6 +641,7 @@ def construir_interfaz():
     def tick():
         if est["pausa"] and not est["sucio"]:
             return          # en pausa y sin cambios: no hay nada que redibujar
+        cambio_usuario = est["sucio"]   # el usuario tocó algo: la tabla se actualiza ya
         est["sucio"] = False
         if not est["pausa"]:
             n = int(POR_CUADRO / DT)
@@ -626,11 +650,15 @@ def construir_interfaz():
                 hist[k] = np.concatenate([hist[k][n:], r[k]])
             est["saturado"] = lazo.saturado
             actualizar_lineas()
-        actualizar_tabla()
+        ahora = time.monotonic()
+        con_tabla = cambio_usuario or est["pausa"] or ahora - est["t_tabla"] >= REFRESCO_TABLA
+        if con_tabla:
+            actualizar_tabla()
+            est["t_tabla"] = ahora
         if not est["pausa"] and ajustar_escalas():
             fig.canvas.draw_idle()
         else:
-            blit()
+            blit(con_tabla)
 
     def mostrar_cursor(i):
         est["cursor"] = i
@@ -650,6 +678,7 @@ def construir_interfaz():
             for cl in cursores:
                 cl.set_visible(False)
             ax_p.set_xlim(-VENTANA * 1e3, 0)    # deshace un posible zoom
+            est["sucio"] = True                 # la tabla deja de decir "EN PAUSA" enseguida
         fig.canvas.draw_idle()
     b_pausa.on_clicked(on_pausa)
 
