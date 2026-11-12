@@ -541,7 +541,8 @@ def construir_interfaz():
     titulo_tabla = ax_t.text(0, 1.02, "", fontsize=9, va="bottom")
 
     # ---- dibujo rápido (blitting): solo se redibuja lo que cambia ----------
-    animados = [l_off, l_on, l_dm, l_u, l_umax, l_umin, l_e, *cursores, *valores_txt, titulo_tabla]
+    animados = [l_off, l_on, l_dm, l_u, l_umax, l_umin, l_e, *cursores, *valores_txt, titulo_tabla,
+                b_pausa.label]   # el texto Pausa/Reanudar cambia sin redibujar toda la ventana
     for a in animados:
         a.set_animated(True)
     fondo = {"img": None}
@@ -557,7 +558,7 @@ def construir_interfaz():
     def zonas():
         """Rectángulos de pantalla que cambian: los tres gráficos y la tabla con su título."""
         tabla_zona = TransformedBbox(Bbox.from_extents(0.645, 0.03, 0.99, 0.385), fig.transFigure)
-        return [ax.bbox for ax in ejes] + [tabla_zona]
+        return [ax.bbox for ax in ejes] + [tabla_zona, b_pausa.ax.bbox]
 
     animados_graficos = [l_off, l_on, l_dm, l_u, l_umax, l_umin, l_e, *cursores]
 
@@ -677,9 +678,13 @@ def construir_interfaz():
             est["cursor"] = None
             for cl in cursores:
                 cl.set_visible(False)
-            ax_p.set_xlim(-VENTANA * 1e3, 0)    # deshace un posible zoom
             est["sucio"] = True                 # la tabla deja de decir "EN PAUSA" enseguida
-        fig.canvas.draw_idle()
+            if not np.allclose(ax_p.get_xlim(), (-VENTANA * 1e3, 0)):
+                ax_p.set_xlim(-VENTANA * 1e3, 0)    # deshace un posible zoom
+                fig.canvas.draw_idle()              # cambian los ejes: hay que redibujar todo
+        # Sin zoom de por medio no hace falta redibujar toda la ventana: el próximo cuadro
+        # actualiza solo el botón, los cursores y la tabla (ver blit).
+        est["sucio"] = True
     b_pausa.on_clicked(on_pausa)
 
     def on_reset(_=None):
