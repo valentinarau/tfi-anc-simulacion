@@ -27,6 +27,13 @@ consideraciones especiales, puntos de interconexión, rango de salida del contro
 amplificador de error, características de la respuesta, cargas asociadas, fecha en carátula,
 copia de la consigna, y rehacer las figuras 1 y 2 en el formato del profesor.
 
+Actualización (12/11/2026): ya están escritas en el informe todas las secciones de la lista anterior
+(6.3 a 6.7, 7.1, 9 Simulación, 10 IoT y calidad de servicio, 11 Conclusión, 12 Consideraciones
+especiales, copia de las pautas). Bibliografía pasó a ser la 13.
+Sigue faltando: fecha de entrega (dice "[a completar]"), rehacer figuras 1 y 2, insertar las
+figuras 3 a 7 de los ensayos (`python simulacion_anc.py --ensayos`, van donde dice
+"[Figura N: insertar ...]") y actualizar el índice en Google Docs.
+
 ## Vocabulario del profesor
 
 - Proporcional por umbral: acción proporcional dentro de una banda delimitada por umbrales.
