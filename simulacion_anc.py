@@ -376,6 +376,16 @@ def construir_interfaz():
     l_u, = ax_u.plot([], [], color="#7a4fa3", lw=1, label="Salida de control u")
     l_umax, = ax_u.plot([], [], color="k", ls=":", lw=0.8, label="Límite del parlante ±Umáx")
     l_umin, = ax_u.plot([], [], color="k", ls=":", lw=0.8)
+    # Umbral bien visible: las líneas del umbral van en rojo y por fuera quedan las zonas de
+    # saturación sombreadas (aparecen cuando u se acerca al umbral; ver ajustar_escalas).
+    l_umax.set(color="#c0392b", ls="--", lw=1.3, label="Umbral ±Umáx (límite del parlante)")
+    l_umin.set(color="#c0392b", ls="--", lw=1.3)
+    zona_sat_sup = Rectangle((0, U_MAX), 1, 1e3, transform=ax_u.get_yaxis_transform(),
+                             facecolor="#c0392b", alpha=0.12, lw=0, zorder=0,
+                             label="Zona de saturación (u recortada)")
+    zona_sat_inf = Rectangle((0, -U_MAX - 1e3), 1, 1e3, transform=ax_u.get_yaxis_transform(),
+                             facecolor="#c0392b", alpha=0.12, lw=0, zorder=0)
+    ax_u.add_patch(zona_sat_sup); ax_u.add_patch(zona_sat_inf)
     l_e, = ax_e.plot([], [], color="#d08c2b", lw=1, label="Error e = R − b")
     ax_p.set_ylabel("Presión en el oído [Pa]")
     ax_u.set_ylabel("Salida de control [V]")
@@ -629,8 +639,17 @@ def construir_interfaz():
     def ajustar_escalas():
         """Cambia la escala vertical solo cuando hace falta (eso obliga a redibujar todo)."""
         cambio = False
+        # Si cambió Umáx, las zonas de saturación se mueven (son parte del fondo: redibujo completo).
+        if not np.isclose(zona_sat_sup.get_y(), lazo.u_max):
+            zona_sat_sup.set_y(lazo.u_max)
+            zona_sat_inf.set_y(-lazo.u_max - 1e3)
+            cambio = True
+        # La salida de control tiene zoom automático: se ve la forma de u.
+        # Si u pasa la mitad del umbral, la escala abarca el umbral entero y sus zonas de saturación.
+        cerca = np.max(np.abs(hist["u"])) >= 0.5 * lazo.u_max
+        datos_u = (hist["u"], np.array([lazo.u_max if cerca else 0.0]))
         for ax, datos, minimo in ((ax_p, (hist["coff"], hist["c"], hist["dm"]), 0.05),
-                                  (ax_u, (hist["u"],), 0.01), (ax_e, (hist["e"],), 1e-4)):
+                                  (ax_u, datos_u, 0.01), (ax_e, (hist["e"],), 1e-4)):
             pico = max(np.max(np.abs(d)) for d in datos)
             lim = ax.get_ylim()[1]
             if pico > lim or max(pico, minimo) < 0.35 * lim:
