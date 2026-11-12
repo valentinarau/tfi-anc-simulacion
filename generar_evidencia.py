@@ -1,5 +1,6 @@
 """
 Genera la carpeta evidencia/: un caso por ensayo, con su gráfico y su explicación.
+El caso 06 (bocina, sección 8.7) no es un ensayo de la sección 9: dibuja su propia figura.
 
 Usa simulacion_anc.py sin modificarlo:
   - los gráficos son los mismos que produce `simulacion_anc.py --ensayos` (figuras 3 a 7 del informe);
@@ -530,12 +531,196 @@ falla: es el error en estado estable propio de un sistema de tipo 0 con acción 
     return readme, fila_indice
 
 
+def correr_bocina(seed, calce="bueno", Kp=300, amp=2.0, dur=0.2):
+    """Bocina del simulador (420 Hz, armónicos 1 a 8 con amplitud 1/n, subida de 5 ms),
+    sin ruido ambiente para medirla sola. Arranca 5 ms después de encender el lazo.
+    Las fases de los armónicos son al azar y dependen de la semilla."""
+    lazo = sim.LazoANC(Kp=Kp, ruido=0.0, seed=seed)
+    lazo.set_calce(calce)
+    lazo.paso(int(5e-3 / DT))
+    lazo.agregar_perturbacion("bocina", amplitud=amp, duracion=dur)
+    r = lazo.paso(int(dur / DT))
+    r["tb"] = r["t"] - r["t"][0]                  # tiempo desde que empieza la bocina
+    sub = r["tb"] < sim.BOCINA_SUBIDA
+    est = (r["tb"] >= 20e-3) & (r["tb"] < dur - sim.BOCINA_SUBIDA)
+    return r, dict(subida=sim.atenuacion_db(r["coff"][sub], r["c"][sub]),
+                   establecido=sim.atenuacion_db(r["coff"][est], r["c"][est]),
+                   umax=float(np.max(np.abs(r["u"]))), est=est)
+
+
+def atenuacion_armonicos(r, est):
+    """Atenuación de cada armónico (espectro sin ANC / con ANC), con el sonido establecido."""
+    x_off, x_on = r["coff"][est], r["c"][est]
+    ventana = np.hanning(len(x_off))
+    f = np.fft.rfftfreq(len(x_off), DT)
+    F_off = np.abs(np.fft.rfft(x_off * ventana))
+    F_on = np.abs(np.fft.rfft(x_on * ventana))
+    res = []
+    for n in range(1, 9):
+        k = int(np.argmin(np.abs(f - n * sim.BOCINA_F0)))
+        res.append(20 * np.log10(F_off[k] / F_on[k]))
+    return res
+
+
+def caso_6(resumen):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    Kp, amp, semillas = 300, 2.0, range(5)
+    corridas = {calce: [correr_bocina(s, calce, Kp, amp) for s in semillas] for calce in ("bueno", "malo")}
+    r0, m0 = corridas["bueno"][0]
+    arm = atenuacion_armonicos(r0, m0["est"])
+
+    # Atenuación esperada con el sonido establecido, calculada con |1 + GH(jω)| y el pasabajos
+    # del proceso (que ya filtra los armónicos agudos antes de llegar al oído).
+    def establecido_teo(K, tau):
+        n = np.arange(1, 9)
+        w = 2 * np.pi * sim.BOCINA_F0 * n
+        Gp = K / np.abs(1j * w * tau + 1)
+        L = Kp * sim.KA * K * sim.KM * np.exp(-1j * w * sim.T_NOM) / (1j * w * tau + 1)
+        a = Gp / n
+        return 10 * np.log10(np.sum(a ** 2) / np.sum((a / np.abs(1 + L)) ** 2))
+
+    tabla, filas_ok = [], True
+    for calce, nombre in (("bueno", "Buen calce"), ("malo", "Mal calce")):
+        sub = [m["subida"] for _, m in corridas[calce]]
+        est = [m["establecido"] for _, m in corridas[calce]]
+        um = [m["umax"] for _, m in corridas[calce]]
+        teo = establecido_teo(sim.CALCE[calce]["K"], sim.CALCE[calce]["tau"])
+        tabla.append(f"| {nombre} | {num(min(sub))} a {num(max(sub))} dB | {num(np.mean(est))} dB "
+                     f"| {num(teo)} dB | {num(min(um), 2)} a {num(max(um), 2)} V |")
+        # Predicciones de 8.7: la subida se atenúa casi igual que el establecido (diferencia
+        # menor a 2 dB) y no hay saturación. El establecido coincide con el cálculo.
+        filas_ok &= (max(abs(s - e) for s, e in zip(sub, est)) < 2.0 and max(um) < sim.U_MAX
+                     and abs(np.mean(est) - teo) < 0.1)
+    sub_b = [m["subida"] for _, m in corridas["bueno"]]
+    est_b = float(np.mean([m["establecido"] for _, m in corridas["bueno"]]))
+    umax_b = max(m["umax"] for _, m in corridas["bueno"])
+
+    # Armónicos según 8.7: fundamental 18 dB, 2.º 13 dB, 5.º 4 dB; desde el 7.º amplifica.
+    arm_ok = (round(arm[0]) == 18 and round(arm[1]) == 13 and round(arm[4]) == 4
+              and arm[6] < 0 and arm[7] < 0 and arm[5] > 0)
+    # Valores que reporta el informe (8.7) para el buen calce: subida entre 16 y 17,5 dB
+    # (redondeado), establecido 16,7 dB y salida de control que no supera 0,9 V.
+    informe_ok = (round(min(sub_b)) >= 16 and round(max(sub_b), 1) <= 17.5
+                  and round(est_b, 1) == 16.7 and umax_b <= 0.9)
+    ok = filas_ok and arm_ok and informe_ok
+    bb = atenuacion_banda_baja(Kp)
+    v = veredicto(False, umax_b >= sim.U_MAX, bb)
+
+    # Figura
+    ms = 1e3
+    fig, axs = plt.subplots(3, 1, figsize=(9, 8), gridspec_kw=dict(height_ratios=[2, 1, 1.3]))
+    t = (r0["tb"]) * ms
+    v_ = t < 30
+    ax = axs[0]
+    ax.axvspan(0, sim.BOCINA_SUBIDA * ms, color="#d08c2b", alpha=0.12, lw=0, label="Subida (5 ms)")
+    ax.plot(t[v_], r0["coff"][v_], color="#9a9a9a", lw=0.8, label="Sin ANC")
+    ax.plot(t[v_], r0["c"][v_], color="#2f6db5", lw=0.8,
+            label=f"Con ANC (subida {num(m0['subida'])} dB, establecido {num(m0['establecido'])} dB)")
+    ax.set_xlim(0, 30); ax.set_ylabel("Presión en el oído [Pa]")
+    ax.set_title("Bocina de 420 Hz, 100 dB SPL, Kp = 300, buen calce")
+    ax.legend(loc="upper right", fontsize=8); ax.grid(alpha=0.3)
+    ax = axs[1]
+    ax.plot(t[v_], r0["u"][v_], color="#2f6db5", lw=0.8)
+    for s in (1, -1):
+        ax.axhline(s * sim.U_MAX, color="#c0392b", ls="--", lw=1)
+    ax.set_xlim(0, 30); ax.set_ylim(-3.6, 3.6); ax.set_xlabel("Tiempo desde que empieza la bocina [ms]")
+    ax.set_ylabel("Salida de control u [V]"); ax.grid(alpha=0.3)
+    ax.text(29.5, 3.1, "Umbral ±3 V", color="#c0392b", fontsize=8, ha="right", va="bottom")
+    ax = axs[2]
+    n = np.arange(1, 9)
+    ax.bar(n, arm, color=["#2f6db5" if a >= 0 else "#c0392b" for a in arm])
+    for k, a in zip(n, arm):
+        ax.text(k, a + (0.4 if a >= 0 else -0.4), num(a), ha="center", va="bottom" if a >= 0 else "top", fontsize=8)
+    ax.axhline(0, color="#555555", lw=0.8)
+    ax.set_xticks(n, [f"{k}\n{num(k * sim.BOCINA_F0 / 1e3, 2)} kHz" for k in n], fontsize=8)
+    ax.set_ylabel("Atenuación [dB]"); ax.set_ylim(min(arm) - 2, max(arm) + 3)
+    ax.set_title("Atenuación de cada armónico con el sonido establecido", fontsize=10); ax.grid(alpha=0.3, axis="y")
+    fig.tight_layout()
+    destino = os.path.join(CARPETA, "06_bocina")
+    os.makedirs(destino, exist_ok=True)
+    fig.savefig(os.path.join(destino, "figura.png"), dpi=150); plt.close(fig)
+
+    filas_arm = "\n".join(f"| {k}.º | {num(k * sim.BOCINA_F0, 0)} Hz | {num(a)} dB |" for k, a in zip(n, arm))
+    readme = f"""# Caso 06: ruido de golpe (bocina)
+
+![Bocina](figura.png)
+
+*Figura generada por `generar_evidencia.py` (no es una de las figuras de `--ensayos`).*
+
+## 1. Qué se prueba y por qué
+
+Se prueba la afirmación de la sección 8.7: una bocina no es instantánea para el lazo. Tarda
+unos milisegundos en alcanzar su nivel y el lazo se asienta en unos 0,43 ms, así que la sigue
+desde el comienzo y la atenúa durante la subida casi lo mismo que con el sonido establecido.
+Lo que limita el resultado es la frecuencia de cada armónico, no la forma en el tiempo.
+
+## 2. Parámetros usados
+
+- Kp = 300 V/V, T = 40 µs, Umáx = 3 V; buen calce (K = 1, τ = 1 ms) y mal calce (K = 0,6, τ = 0,5 ms).
+- La bocina del simulador: fundamental de {num(sim.BOCINA_F0, 0)} Hz y armónicos 2 a 8 con
+  amplitud 1/n, que sube en rampa en 5 ms. Llega al oído con {num(amp)} Pa eficaces (100 dB SPL)
+  y dura 200 ms.
+- **Sin ruido ambiente**, para medir la bocina sola.
+- Subida: los primeros 5 ms. Sonido establecido: de 20 a 195 ms.
+- Las fases de los armónicos son al azar: se repitió con 5 semillas (0 a 4). El gráfico es la
+  semilla 0.
+
+## 3. Qué predice el informe
+
+- **Sección 8.7:** la atenuación durante la subida es prácticamente la misma que con el sonido
+  establecido; la fundamental se atenúa unos 18 dB, el segundo armónico (840 Hz) unos 13 dB y
+  el quinto (2,1 kHz) unos 4 dB; desde el séptimo armónico (unos 2,9 kHz) el lazo amplifica
+  levemente. No hay saturación: la salida de control no supera 0,9 V, lejos del umbral de 3 V.
+  La bocina se atenúa en forma parcial sin que el lazo falle.
+- **Sección 8.7, valores del simulador:** con buen calce, la atenuación durante la subida está
+  entre 16 y 17,5 dB según las fases de los armónicos, y con el sonido establecido es 16,7 dB.
+- Con el sonido establecido, la atenuación total se puede calcular con |1 + GH(jω)| en cada
+  armónico, pesando cada uno por lo que deja pasar el proceso (columna "Cálculo").
+
+## 4. Qué dio la simulación
+
+| Calce | Durante la subida (5 semillas) | Sonido establecido | Cálculo | Salida de control máx. |
+|---|---|---|---|---|
+{chr(10).join(tabla)}
+
+Atenuación por armónico (buen calce, semilla 0):
+
+| Armónico | Frecuencia | Atenuación |
+|---|---|---|
+{filas_arm}
+
+El valor establecido no depende de las fases; el de la subida sí, porque en 5 ms los armónicos
+se suman distinto según cómo arranque cada uno. ¿Coincide con la predicción? **{si_no(ok)}**.
+
+## 5. Veredicto
+
+**{v}.** El lazo no oscila, no satura y en la banda baja atenúa {num(bb)} dB. La bocina se
+atenúa {num(est_b)} dB con el sonido establecido: menos que la meta de 20 dB, porque sus
+armónicos están en frecuencias medias y altas, donde el lazo atenúa poco. Eso no es una falla
+del lazo (la meta se fija para la banda baja, sección 6.7); los armónicos agudos los bloquea la
+almohadilla.
+"""
+    fila_indice = [dict(
+        caso="6. Bocina de 420 Hz, 100 dB SPL", seccion="8.7",
+        predice="Subida 16 a 17,5 dB ≈ establecido 16,7 dB; fundamental 18 dB, 5.º armónico 4 dB, "
+                "desde el 7.º amplifica; u ≤ 0,9 V",
+        dio=f"Subida {num(min(sub_b))} a {num(max(sub_b))} dB, establecido {num(est_b)} dB; "
+            f"armónicos {num(arm[0])} / {num(arm[4])} / {num(arm[6])} dB; u máx. {num(umax_b, 2)} V",
+        veredicto=v, coincide=ok)]
+    return readme, fila_indice
+
+
+# El png None indica que el caso dibuja su propia figura (no sale de ensayos()).
 CASOS = [
     ("01_barrido_kp", "ensayo1_barrido_kp.png", "Barrido de la ganancia Kp", "9.2", caso_1),
     ("02_retardo", "ensayo2_retardo.png", "Retardo creciente", "9.3", caso_2),
     ("03_perdida_sello", "ensayo3_mal_calce.png", "Pérdida de sello", "9.4", caso_3),
     ("04_hibrido", "ensayo4_hibrido.png", "Realimentación sola y esquema híbrido", "9.5", caso_4),
     ("05_escalon", "ensayo5_escalon.png", "Error en estado estable ante un escalón", "9.6", caso_5),
+    ("06_bocina", None, "Ruido de golpe: bocina", "8.7", caso_6),
 ]
 
 
@@ -547,7 +732,8 @@ def main():
             readme, fi = fn(resumen)
             destino = os.path.join(CARPETA, carpeta)
             os.makedirs(destino, exist_ok=True)
-            shutil.copyfile(os.path.join(tmp, png), os.path.join(destino, "figura.png"))
+            if png is not None:
+                shutil.copyfile(os.path.join(tmp, png), os.path.join(destino, "figura.png"))
             with open(os.path.join(destino, "README.md"), "w", encoding="utf-8") as f:
                 f.write(readme.rstrip() + "\n")
             filas.append(fi)
@@ -565,8 +751,9 @@ def main():
 
     indice = f"""# Evidencia de los ensayos
 
-Un caso por cada ensayo de la sección 9 del informe. Cada carpeta tiene el gráfico
-(`figura.png`, el mismo que va en el informe) y un README con qué se prueba, los parámetros,
+Un caso por cada ensayo de la sección 9 del informe (casos 01 a 05), más el caso 06, que
+prueba la bocina de la sección 8.7. Cada carpeta tiene el gráfico (`figura.png`; en los casos
+01 a 05 es el mismo que va en el informe) y un README con qué se prueba, los parámetros,
 qué predice el informe, qué dio la simulación y el veredicto.
 
 **Cómo se generó:** `python generar_evidencia.py`, que usa `simulacion_anc.py` sin modificarlo.
