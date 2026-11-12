@@ -34,6 +34,12 @@ Sigue faltando: fecha de entrega (dice "[a completar]"), rehacer figuras 1 y 2, 
 figuras 3 a 7 de los ensayos (`python simulacion_anc.py --ensayos`, van donde dice
 "[Figura N: insertar ...]") y actualizar el índice en Google Docs.
 
+Actualización (12/11/2026, 2): 7.1 reescrita (PI descartado por continua no medible, windup y
+beneficio nulo; PD/PID con números del modelo), párrafo nuevo en 8.3 (el escalón no implica
+componente constante), sección nueva 8.7 (tránsito sostenido, bocina, colectivo en ralentí),
+9.1 actualizada con la cámara lenta y los valores eficaces de la interfaz, 6 entradas nuevas
+en la bibliografía.
+
 ## Vocabulario del profesor
 
 - Proporcional por umbral: acción proporcional dentro de una banda delimitada por umbrales.
