@@ -68,3 +68,10 @@ Actualización (12/11/2026, 5): revisión de redacción aplicada al informe (res
 unificado en Kp = 300 (8.3, 8.7, conclusión: ~11 dB a 1 kHz, amplifica desde ~2,9 kHz). Planitud del
 micrófono por debajo de 50 Hz tratada igual en 6.1 y 8.7. En 10.2 la decisión de ganancia queda en el
 auricular (la red no baja Kp). Mapa de ítems de la consigna al inicio de la sección 6.
+
+Actualización (12/11/2026, 6): segunda revisión aplicada. Cuerpo: ~6.850 palabras, 26 páginas. Sacada la jerga
+de mercado y de electrónica (Sony de la Tabla 1, XENSIV, MEMS, salida diferencial, windup, filtro de refuerzo,
+fórmula de rpm, especificación BLE, gateway, firmware). Ajustado a lo que da la materia (apuntes del proyecto):
+sin respuesta en frecuencia (|1 + GH(jω)| reemplazado), sin coeficiente de amortiguamiento ni frecuencia natural
+(la materia ve solo primer orden), Tabla 5 con el vocabulario de los apuntes (PI agrega polo en el origen,
+PD agrega un cero). Epígrafe de la Figura 9 define OT e IT.
