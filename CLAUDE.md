@@ -123,3 +123,7 @@ indicador funciona como slider (arrastrar sube o baja Kp, 300 a 650); tocarla o 
 
 Actualización (13/11/2026, 10): Esc en la app primero cierra lo que esté abierto ("?", carteles del micrófono) y, si no hay
 nada, vuelve al inicio igual que tocar el título (paleta y sample cargado quedan).
+
+Actualización (13/11/2026, 11): audios de prueba para "05 sample" en `samples/` (calle, transporte, efectos), con
+origen, licencia y atenuación medida en `samples/README.md`. Las dos grabaciones de Buenos Aires están recortadas a 1 min;
+falta completar su origen.
