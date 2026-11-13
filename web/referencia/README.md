@@ -38,8 +38,12 @@ Las pantallas de inicio, reposo, los dos primeros cuadros del pulso y las tres d
   entre 6 paletas de prueba: en la app final queda solo `t0`.
 - **Tipografías:** Marcellus (títulos y número) e Inter (frases y etiquetas), de Google Fonts.
 - **Textura de papel:** el prototipo usa una imagen interna de la herramienta
-  (`/_blob/104f0a61...`) que no está disponible. Reemplazarla por una textura equivalente
-  generada (por ejemplo, ruido SVG con `feTurbulence`).
+  (`/_blob/104f0a61...`). Está extraída en `grano.png` (320 × 320, gris con transparencia).
+  Se usa igual que en el prototipo: una capa encima de todo el lienzo (crema y oliva), sin
+  capturar clics:
+  `.grano{background-image:url(grano.png);background-size:320px 320px;background-repeat:repeat;opacity:0.55;pointer-events:none}`.
+  Salió de la exportación del diseño del 12/11; es la única imagen interna que usan todas las
+  pantallas, con el mismo tamaño y la misma clase.
 - **Lienzo:** diseñado a 1920 × 1080. Se proyecta: escalar manteniendo la proporción.
 - **Teclado del prototipo:** 1 a 4 ruidos, espacio = cancelar, F = aflojar/apretar,
   mantener G = apretar de más, ? = ayuda, Esc = cerrar. (5 y T son de prueba.)
