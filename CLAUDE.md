@@ -101,3 +101,8 @@ La demo está en https://valentinarau.github.io/tfi-anc-simulacion/ y se vuelve 
 Actualización (13/11/2026, 5): app web apta para celular (lienzo vertical 1080 × 1920 cuando la pantalla está parada),
 sin raya en los bordes (textura, oliva y línea siguen fuera del lienzo), y textura de papel original (`web/grano.png`,
 copiada de `web/referencia/grano.png`). Los enlaces llevan `?v=N` para que el navegador no use versiones viejas en caché.
+
+Actualización (13/11/2026, 6): diseño final de la página de información en `web/referencia/Info.dc.html`,
+con la especificación para construirla en `web/referencia/INFO.md` y sus fotos en `web/referencia/img/`.
+`Prototipo.dc.html` actualizado (indicador "ganancia 300 → N" con marca de límite y enlace "[info] →" en el "?").
+Próximo paso: Claude Code construye la página de información en `web/` y suma esos dos cambios a la app.

@@ -25,6 +25,8 @@ comunes.
 | `Silba.dc.html` | El silbido. |
 | `Calma.dc.html` | Soltar: vuelta a la calma. |
 | `Ayuda.dc.html` | "?" abierto. |
+| `Info.dc.html` | Página de información ("cómo se borra el ruido"), a la que lleva "[info] →" del "?". **Especificación completa en `INFO.md`.** Sus imágenes están en `img/`. |
+| `INFO.md` | Especificación para construir la página de información y los dos cambios nuevos del prototipo. |
 
 Las pantallas de inicio, reposo, los dos primeros cuadros del pulso y las tres del micrófono
 (permiso, denegado y auriculares) no se copiaron como archivo aparte: sus estados están en
@@ -49,3 +51,10 @@ Las pantallas de inicio, reposo, los dos primeros cuadros del pulso y las tres d
   mantener G = apretar de más, ? = ayuda, Esc = cerrar. (5 y T son de prueba.)
 - **Números:** los dB y las ondas del prototipo son de relleno. En la app salen de la
   simulación.
+
+## Actualización 13/11/2026 (tarde)
+
+- `Prototipo.dc.html` reemplazado por la versión final del diseño: suma el indicador
+  "ganancia 300 → N" con la marca del límite y el enlace "[info] →" dentro del "?" (detalle en `INFO.md`, punto 7).
+- Nuevo `Info.dc.html` + `INFO.md` + `img/` (8 fotos). En `Info.dc.html` las imágenes ya apuntan a
+  `img/…` y `grano.png` en lugar de `/_blob/…`.

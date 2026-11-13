@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>info · borrar el ruido</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Marcellus&amp;family=Inter:wght@400;500;600&amp;display=swap">
+<style>
+body{margin:0}
+html{scroll-behavior:smooth}
+.pg{position:relative;isolation:isolate;min-height:100vh;overflow:hidden;background:var(--papel);color:var(--oliva);font-family:'Inter', system-ui, sans-serif;font-weight:500}
+.pg *{box-sizing:border-box}
+.pg h1,.pg h2,.pg h3,.pg p,.pg ul,.pg li,.pg figure{margin:0;padding:0;list-style:none;font-weight:inherit;color:inherit}
+.pg a{color:inherit;text-decoration:none}
+.grano{position:absolute;inset:0;z-index:-1;pointer-events:none;background-image:url(grano.png);background-size:320px 320px;opacity:.55}
+.wrap{padding-left:clamp(16px,2.27px + 3.661vw,96px);padding-right:clamp(16px,2.27px + 3.661vw,96px)}
+.row{display:flex;flex-wrap:wrap;gap:clamp(40px,5vw,96px)}
+.pg .t7xl{font-family:'Marcellus', 'Times New Roman', serif;font-size:clamp(4rem,2.5915rem + 6.0094vw,8rem);line-height:1;color:var(--relleno)}
+.t6xl{font-family:'Marcellus', 'Times New Roman', serif;font-size:clamp(3.5rem,2.7277rem + 3.2952vw,8rem);line-height:.95;text-transform:uppercase}
+.t5xl{font-family:'Marcellus', 'Times New Roman', serif;font-size:clamp(2.75rem,2rem + 2.6vw,6rem);line-height:.95;text-transform:uppercase}
+.t3xl{font-size:clamp(1.75rem,1.6rem + .6vw,2.25rem);letter-spacing:-.02em;line-height:1.1;font-weight:600}
+.tlg{font-size:clamp(.95rem,.85rem + .35vw,1.2rem);line-height:1.3}
+.tnav{font-size:clamp(.8rem,.74rem + .2vw,.95rem)}
+.tbase{font-size:14px;line-height:1.5}
+.tsm{font-size:14px;line-height:1.2}
+.tmid{font-family:'Marcellus', 'Times New Roman', serif;font-size:clamp(2.75rem,1.6rem + 3.4vw,5.5rem);line-height:.9}
+.bn{display:flex;align-items:baseline;gap:14px}
+.bn-n{font-family:'Marcellus', 'Times New Roman', serif;font-size:clamp(5rem,2rem + 9vw,16rem);line-height:.8}
+.bn-u{font-size:clamp(1.25rem,1rem + .6vw,1.75rem)}
+.pg .s-title{margin-bottom:clamp(40px,4vw,64px)}
+.pg .t5xl.low{text-transform:none;font-size:clamp(2rem,1.8239rem + .7512vw,2.5rem);line-height:1.2}
+.item{display:flex;flex-direction:column;gap:14px}
+.g1{display:grid;grid-template-columns:1fr;gap:36px}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:48px 64px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:48px 64px}
+/* header */
+.hd{position:relative;z-index:2;display:flex;justify-content:space-between;align-items:center;gap:32px;padding-top:40px}
+.hd-logo{white-space:nowrap}
+.hd-logo-t{font-weight:600;font-size:clamp(.95rem,.85rem + .35vw,1.2rem);text-transform:uppercase}
+.hd-list{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:clamp(20px,2.8vw,40px);white-space:nowrap}
+.bk{display:inline-flex;gap:.3em;align-items:baseline;background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer}
+.bk.tnav{font-size:clamp(.8rem,.74rem + .2vw,.95rem)}
+.bk .b{opacity:0;transition:opacity .3s ease-in-out}
+.bk:hover .b,.bk:focus-visible .b{opacity:1}
+.pg a:focus-visible,.pg button:focus-visible{outline:1px solid currentColor;outline-offset:6px}
+/* hero */
+.ph{position:relative;isolation:isolate;padding-top:clamp(64px,7vw,112px);padding-bottom:0}
+.ph-ja{position:absolute;z-index:-1;top:clamp(120px,12vw,200px);right:clamp(16px,2.27px + 3.661vw,96px);text-transform:uppercase;white-space:nowrap;pointer-events:none}
+.ph-label{margin-top:40px}
+.ph-foot{display:flex;justify-content:flex-end;margin:48px 0 24px}
+.ph-scroll{width:fit-content;position:relative;overflow:hidden}
+.sc{display:block;animation:sc 2.6s cubic-bezier(.7,0,.3,1) infinite}
+.sc2{position:absolute;top:0;left:0;transform:translateY(-100%);animation-name:sc2}
+@keyframes sc{0%,45%{transform:translateY(0)}65%,100%{transform:translateY(100%)}}
+@keyframes sc2{0%,45%{transform:translateY(-100%)}65%,100%{transform:translateY(0)}}
+.ph-border{width:100vw;margin-left:calc(50% - 50vw);border-bottom:1px dashed var(--oliva)}
+/* secciones */
+.sec{padding-top:clamp(80px,9vw,140px)}
+.r-img{flex:1 1 440px;min-width:0;aspect-ratio:1/1;max-height:80vh;overflow:hidden}
+.r-img img,.m-img img{display:block;width:100%;height:100%;object-fit:cover}
+.r-txt{flex:1 1 520px;min-width:0;display:flex;flex-direction:column;justify-content:center;gap:48px}
+.r-lab{align-self:center}
+.r-txt .bn{align-self:flex-end}
+.n-left{flex:1 1 380px;min-width:0;display:flex;flex-direction:column;gap:24px}
+.n-right{flex:1.4 1 520px;min-width:0;align-self:flex-end}
+.s-row{align-items:flex-start}
+.s-fig{flex:1.3 1 520px;min-width:0}
+.s-ondas{grid-template-columns:repeat(3,minmax(0,1fr));gap:40px 40px}
+@media (max-width:767px){.s-ondas{grid-template-columns:1fr}}
+.s-txt{flex:1 1 380px;min-width:0}
+.nums{display:flex;flex-wrap:nowrap;gap:clamp(24px,3.5vw,72px)}
+.nums .tmid{line-height:.9}
+.cuerda{display:block;width:100%;height:auto;aspect-ratio:2/1;cursor:pointer;touch-action:pan-y;overflow:visible}
+.c-lab{font-family:'Inter', system-ui, sans-serif;font-size:13px;fill:var(--suave)}
+.s-onda{display:block;width:100%;max-width:520px;height:auto;margin-bottom:48px;overflow:visible}
+.s-path{stroke:var(--carbon);transition:stroke .5s ease}
+.s-onda.on .s-path{stroke:var(--ladrillo)}
+.nums .tmid{font-size:clamp(2.75rem,1rem + 5.6vw,7.5rem)}
+.s-num{background:none;border:0;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:left;transition:opacity .3s ease}
+.s-num:not(.on){opacity:.45}
+.s-num:hover{opacity:1}
+.c-row{align-items:center}
+.c-fig{flex:1.3 1 480px;min-width:0;max-width:760px}
+.c-side{flex:1 1 320px;min-width:0}
+.c-btns{display:flex;gap:28px;margin-bottom:28px}
+.c-btn.on .b{opacity:1}
+.c-btn:not(.on){opacity:.55}
+.c-txts{display:grid}
+.c-txt{grid-area:1/1;opacity:0;transform:translateY(6px);transition:opacity .45s ease,transform .45s ease;max-width:420px}
+.c-txt.on{opacity:1;transform:none}
+.c-aire{opacity:0;transition:opacity .6s ease}
+.c-aire.on{opacity:1}
+.cuerda,.s-num,.c-btn{user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+.pg .cuerda:focus,.pg .s-num:focus,.pg .c-btn:focus{outline:none}
+.pg .cuerda:focus-visible,.pg .s-num:focus-visible,.pg .c-btn:focus-visible{outline:1px solid currentColor;outline-offset:8px}
+.c-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:48px clamp(40px,5vw,96px)}
+.m-row{align-items:center}
+.m-txt{flex:1.4 1 520px;min-width:0}
+.m-img{flex:1 1 360px;min-width:0;height:clamp(420px,40vw,600px);overflow:hidden}
+/* cómo funciona */
+.ap{position:relative;overflow:hidden;margin-top:clamp(80px,9vw,140px);padding:clamp(96px,9vw,140px) 0;color:var(--papel)}
+.ap-bg{position:absolute;inset:0;overflow:hidden;z-index:-2}
+.ap-bg img{position:absolute;left:0;top:-10%;width:100%;height:120%;object-fit:cover;will-change:transform}
+.ap-veil{position:absolute;inset:0;z-index:-1;background:rgba(28,26,20,.6)}
+.ap-head{flex:1 1 440px;min-width:0}
+.ap-list{flex:1 1 480px;min-width:0;max-width:640px;padding-top:clamp(0px,8vw,120px);display:flex;flex-direction:column;gap:72px}
+.ap-list .item{gap:20px}
+/* footer */
+.ft{margin-top:clamp(96px,10vw,160px);min-height:100svh;display:flex}
+.ft-wrap{flex:1;display:flex;flex-direction:column;padding-top:48px}
+.ft-head{width:fit-content;margin-left:auto;display:flex;flex-direction:column;gap:40px}
+.ft-row{display:flex;flex-wrap:wrap;gap:40px 80px}
+.f-label{margin-bottom:12px}
+.f-list{display:flex;flex-direction:column}
+.f-link{display:flex;width:fit-content;transition:opacity .3s ease-in-out}.f-link:hover{opacity:.5}
+.ft-up{align-self:flex-end}
+@media (max-width:767px){.ft-head{margin-left:0}}
+.ft-bottom{margin-top:auto}
+.ft-title{font-family:'Marcellus', 'Times New Roman', serif;text-align:center;font-size:clamp(3rem,-.4539rem + 14.7368vw,23.125rem);line-height:1;overflow:hidden;text-transform:uppercase;padding-bottom:.04em}
+/* animaciones: solo se activan cuando hay JS (data-anim), sin re-render de React */
+.ltr{display:inline-block}
+[data-anim] .ltr{transform:translateY(105%);transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+[data-anim] .ft.in .ltr{transform:none}
+[data-anim] .ft:not(.in) .ltr{transition-duration:0s;transition-delay:0s!important}
+[data-anim] .rv{opacity:0;transform:translateY(24px);transition:opacity .9s ease-out,transform .9s cubic-bezier(.2,.7,.2,1)}
+[data-anim] .rv.in{opacity:1;transform:none}
+@media (prefers-reduced-motion: reduce){[data-anim] .rv,[data-anim] .ltr{transition:none;opacity:1;transform:none}.sc{animation:none}.sc2{display:none}html{scroll-behavior:auto}}
+
+.t0{--papel:#F2E3C8;--oliva:#55603A;--carbon:#2B2618;--suave:#6A5E45;--rosa:#C0647A;--ladrillo:#9E3B2C;--relleno:#E8D5B3}
+.t1{--papel:#F3DED8;--oliva:#5C3F33;--carbon:#2A1F1A;--suave:#6E5550;--rosa:#9E4A5E;--ladrillo:#8E2B32;--relleno:#E8CFC8}
+.t2{--papel:#F4DFDB;--oliva:#4E6A55;--carbon:#23281F;--suave:#66605C;--rosa:#A84F66;--ladrillo:#8E2B3A;--relleno:#EBCFC9}
+.t3{--papel:#F4EEDF;--oliva:#4F8682;--carbon:#24302F;--suave:#5E6560;--rosa:#B0613F;--ladrillo:#9C3A22;--relleno:#E9E1CD}
+.t4{--papel:#EEEBE4;--oliva:#2B2A28;--carbon:#1E1D1B;--suave:#5F5C56;--rosa:#2F4FBF;--ladrillo:#C2402A;--relleno:#E2DED4}
+.t5{--papel:#F3EEE2;--oliva:#6C8570;--carbon:#222A23;--suave:#5F625C;--rosa:#B0654A;--ladrillo:#9C3A22;--relleno:#E7E0CF}
+</style>
+</helmet>
+<div ref="{{rootRef}}" class="pg {{temaClass}}"><sc-if value="{{grano}}" hint-placeholder-val="{{ true }}"><div class="grano" aria-hidden="true"></div></sc-if><header class="hd wrap"><a class="hd-logo" href="Prototipo.dc.html"><span class="hd-logo-t">Borrar el ruido</span></a><nav aria-label="secciones"><ul class="hd-list"><li><a class="bk tnav" href="#ruido" onClick="{{go.ruido}}"><span class="b" aria-hidden="true">[</span><span>El ruido</span><span class="b" aria-hidden="true">]</span></a></li><li><a class="bk tnav" href="#funciona" onClick="{{go.funciona}}"><span class="b" aria-hidden="true">[</span><span>Cómo funciona</span><span class="b" aria-hidden="true">]</span></a></li><li><a class="bk tnav" href="#numero" onClick="{{go.numero}}"><span class="b" aria-hidden="true">[</span><span>El número</span><span class="b" aria-hidden="true">]</span></a></li><li><a class="bk tnav" href="#silbido" onClick="{{go.silbido}}"><span class="b" aria-hidden="true">[</span><span>El silbido</span><span class="b" aria-hidden="true">]</span></a></li><li><a class="bk tnav" href="Prototipo.dc.html"><span class="b" aria-hidden="true">[</span><span>← App</span><span class="b" aria-hidden="true">]</span></a></li></ul></nav></header><main><div class="ph wrap" id="top" ref="{{refs.top}}"><p class="t7xl ph-ja" aria-hidden="true">silencio</p><h1 class="t6xl">Cómo se<br>borra<br>el ruido</h1><p class="tlg ph-label">Una nota sobre lo que ves en la app</p><div class="ph-foot"><div class="ph-scroll" aria-hidden="true"><span class="tsm sc">Scroll</span><span class="tsm sc sc2">Scroll</span></div></div><div class="ph-border"></div></div><section ref="{{refs.ruido}}" id="ruido" class="rv sec"><div class="wrap row"><div class="r-img"><img src="img/obelisco.jpg" alt="Obelisco de Buenos Aires, cruce de Corrientes y 9 de Julio, con tránsito" style="object-position: 62% 50%"></div><div class="r-txt"><span class="tsm r-lab">[Obelisco, de día]</span><div class="bn"><span class="bn-n" style="color: var(--ladrillo)">76</span><span class="bn-u" style="color: var(--ladrillo)">dB</span></div><div class="g2"><sc-for list="{{t.ruido}}" as="it" hint-placeholder-count="2"><div class="item"><span class="tsm">[{{it.k}}]</span><p class="tbase">{{it.v}}</p></div></sc-for></div></div></div></section><section ref="{{refs.ves}}" id="ves" class="rv sec"><div class="wrap"><h2 class="t5xl s-title low">qué ves</h2><div class="g3"><sc-for list="{{tm.ves}}" as="it" hint-placeholder-count="2"><div class="item"><sc-if value="{{it.m_ruido}}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 360 100" aria-hidden="true" style="display: block; width: 100%; max-width: 360px; height: auto"><path d="M6,50 C7,51 9.9,53.9 11.8,55.9 C13.7,57.8 15.7,59.9 17.6,61.7 C19.5,63.6 21.5,65.5 23.4,67.2 C25.3,68.9 27.3,70.5 29.2,71.8 C31.1,73.2 33.1,74.4 35,75.4 C36.9,76.3 38.9,77 40.8,77.5 C42.7,77.9 44.7,78.1 46.6,78 C48.5,77.9 50.5,77.5 52.4,76.9 C54.3,76.2 56.3,75.2 58.2,74 C60.1,72.8 62.1,71.3 64,69.7 C65.9,68 67.9,66 69.8,64 C71.7,62 73.7,59.7 75.6,57.4 C77.5,55.1 79.5,52.7 81.4,50.3 C83.3,47.9 85.3,45.5 87.2,43.1 C89.1,40.8 91.1,38.5 93,36.4 C94.9,34.3 96.9,32.2 98.8,30.5 C100.7,28.7 102.7,27.1 104.6,25.8 C106.5,24.5 108.5,23.4 110.4,22.6 C112.3,21.8 114.3,21.3 116.2,21.1 C118.1,20.9 120.1,21 122,21.4 C123.9,21.8 125.9,22.4 127.8,23.3 C129.7,24.2 131.7,25.4 133.6,26.8 C135.5,28.2 137.5,29.8 139.4,31.5 C141.3,33.2 143.3,35.2 145.2,37.1 C147.1,39.1 149.1,41.2 151,43.2 C152.9,45.3 154.9,47.4 156.8,49.5 C158.7,51.5 160.7,53.5 162.6,55.4 C164.5,57.3 166.5,59.1 168.4,60.8 C170.3,62.4 172.3,63.9 174.2,65.2 C176.1,66.5 178.1,67.6 180,68.5 C181.9,69.4 183.9,70.1 185.8,70.6 C187.7,71 189.7,71.3 191.6,71.4 C193.5,71.4 195.5,71.2 197.4,70.9 C199.3,70.6 201.3,70 203.2,69.3 C205.1,68.6 207.1,67.7 209,66.7 C210.9,65.7 212.9,64.5 214.8,63.3 C216.7,62.1 218.7,60.7 220.6,59.4 C222.5,58 224.5,56.5 226.4,55 C228.3,53.6 230.3,52 232.2,50.6 C234.1,49.1 236.1,47.6 238,46.2 C239.9,44.8 241.9,43.4 243.8,42.1 C245.7,40.9 247.7,39.6 249.6,38.5 C251.5,37.4 253.5,36.4 255.4,35.5 C257.3,34.7 259.3,33.9 261.2,33.3 C263.1,32.7 265.1,32.3 267,32 C268.9,31.7 270.9,31.6 272.8,31.6 C274.7,31.6 276.7,31.8 278.6,32.2 C280.5,32.6 282.5,33.1 284.4,33.9 C286.3,34.6 288.3,35.5 290.2,36.5 C292.1,37.5 294.1,38.7 296,40 C297.9,41.3 299.9,42.8 301.8,44.3 C303.7,45.8 305.7,47.4 307.6,49.1 C309.5,50.8 311.5,52.6 313.4,54.3 C315.3,56 317.3,57.8 319.2,59.5 C321.1,61.2 323.1,62.9 325,64.5 C326.9,66 328.9,67.5 330.8,68.8 C332.7,70.1 334.7,71.3 336.6,72.3 C338.5,73.3 340.5,74.1 342.4,74.6 C344.3,75.2 346.3,75.5 348.2,75.5 C350.1,75.6 353,75.1 354,75" fill="none" stroke-width="4" stroke-linecap="round" style="stroke: var(--oliva)"></path></svg></sc-if><sc-if value="{{it.m_oido}}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 360 100" aria-hidden="true" style="display: block; width: 100%; max-width: 360px; height: auto"><path d="M6,50 C7,50.2 9.9,50.7 11.8,51 C13.7,51.3 15.7,51.6 17.6,52 C19.5,52.3 21.5,52.6 23.4,52.9 C25.3,53.1 27.3,53.4 29.2,53.6 C31.1,53.9 33.1,54.1 35,54.2 C36.9,54.4 38.9,54.5 40.8,54.6 C42.7,54.7 44.7,54.7 46.6,54.7 C48.5,54.7 50.5,54.6 52.4,54.5 C54.3,54.4 56.3,54.2 58.2,54 C60.1,53.8 62.1,53.6 64,53.3 C65.9,53 67.9,52.7 69.8,52.3 C71.7,52 73.7,51.6 75.6,51.2 C77.5,50.9 79.5,50.4 81.4,50.1 C83.3,49.7 85.3,49.2 87.2,48.9 C89.1,48.5 91.1,48.1 93,47.7 C94.9,47.4 96.9,47 98.8,46.7 C100.7,46.5 102.7,46.2 104.6,46 C106.5,45.7 108.5,45.6 110.4,45.4 C112.3,45.3 114.3,45.2 116.2,45.2 C118.1,45.2 120.1,45.2 122,45.2 C123.9,45.3 125.9,45.4 127.8,45.6 C129.7,45.7 131.7,45.9 133.6,46.1 C135.5,46.4 137.5,46.6 139.4,46.9 C141.3,47.2 143.3,47.5 145.2,47.9 C147.1,48.2 149.1,48.5 151,48.9 C152.9,49.2 154.9,49.6 156.8,49.9 C158.7,50.2 160.7,50.6 162.6,50.9 C164.5,51.2 166.5,51.5 168.4,51.8 C170.3,52.1 172.3,52.3 174.2,52.5 C176.1,52.7 178.1,52.9 180,53.1 C181.9,53.2 183.9,53.3 185.8,53.4 C187.7,53.5 189.7,53.5 191.6,53.6 C193.5,53.6 195.5,53.5 197.4,53.5 C199.3,53.4 201.3,53.3 203.2,53.2 C205.1,53.1 207.1,53 209,52.8 C210.9,52.6 212.9,52.4 214.8,52.2 C216.7,52 218.7,51.8 220.6,51.6 C222.5,51.3 224.5,51.1 226.4,50.8 C228.3,50.6 230.3,50.3 232.2,50.1 C234.1,49.9 236.1,49.6 238,49.4 C239.9,49.1 241.9,48.9 243.8,48.7 C245.7,48.5 247.7,48.3 249.6,48.1 C251.5,47.9 253.5,47.7 255.4,47.6 C257.3,47.4 259.3,47.3 261.2,47.2 C263.1,47.1 265.1,47 267,47 C268.9,46.9 270.9,46.9 272.8,46.9 C274.7,46.9 276.7,47 278.6,47 C280.5,47.1 282.5,47.2 284.4,47.3 C286.3,47.4 288.3,47.6 290.2,47.7 C292.1,47.9 294.1,48.1 296,48.3 C297.9,48.5 299.9,48.8 301.8,49 C303.7,49.3 305.7,49.6 307.6,49.9 C309.5,50.1 311.5,50.4 313.4,50.7 C315.3,51 317.3,51.3 319.2,51.6 C321.1,51.9 323.1,52.2 325,52.4 C326.9,52.7 328.9,52.9 330.8,53.1 C332.7,53.4 334.7,53.6 336.6,53.7 C338.5,53.9 340.5,54 342.4,54.1 C344.3,54.2 346.3,54.2 348.2,54.3 C350.1,54.3 353,54.2 354,54.2" fill="none" stroke-width="2.5" stroke-linecap="round" style="stroke: var(--carbon)"></path></svg></sc-if><sc-if value="{{it.m_rosa}}" hint-placeholder-val="{{ false }}"><svg viewBox="0 0 360 100" aria-hidden="true" style="display: block; width: 100%; max-width: 360px; height: auto"><path d="M6,50 C7,51 9.9,53.9 11.8,55.9 C13.7,57.8 15.7,59.9 17.6,61.7 C19.5,63.6 21.5,65.5 23.4,67.2 C25.3,68.9 27.3,70.5 29.2,71.8 C31.1,73.2 33.1,74.4 35,75.4 C36.9,76.3 38.9,77 40.8,77.5 C42.7,77.9 44.7,78.1 46.6,78 C48.5,77.9 50.5,77.5 52.4,76.9 C54.3,76.2 56.3,75.2 58.2,74 C60.1,72.8 62.1,71.3 64,69.7 C65.9,68 67.9,66 69.8,64 C71.7,62 73.7,59.7 75.6,57.4 C77.5,55.1 79.5,52.7 81.4,50.3 C83.3,47.9 85.3,45.5 87.2,43.1 C89.1,40.8 91.1,38.5 93,36.4 C94.9,34.3 96.9,32.2 98.8,30.5 C100.7,28.7 102.7,27.1 104.6,25.8 C106.5,24.5 108.5,23.4 110.4,22.6 C112.3,21.8 114.3,21.3 116.2,21.1 C118.1,20.9 120.1,21 122,21.4 C123.9,21.8 125.9,22.4 127.8,23.3 C129.7,24.2 131.7,25.4 133.6,26.8 C135.5,28.2 137.5,29.8 139.4,31.5 C141.3,33.2 143.3,35.2 145.2,37.1 C147.1,39.1 149.1,41.2 151,43.2 C152.9,45.3 154.9,47.4 156.8,49.5 C158.7,51.5 160.7,53.5 162.6,55.4 C164.5,57.3 166.5,59.1 168.4,60.8 C170.3,62.4 172.3,63.9 174.2,65.2 C176.1,66.5 178.1,67.6 180,68.5 C181.9,69.4 183.9,70.1 185.8,70.6 C187.7,71 189.7,71.3 191.6,71.4 C193.5,71.4 195.5,71.2 197.4,70.9 C199.3,70.6 201.3,70 203.2,69.3 C205.1,68.6 207.1,67.7 209,66.7 C210.9,65.7 212.9,64.5 214.8,63.3 C216.7,62.1 218.7,60.7 220.6,59.4 C222.5,58 224.5,56.5 226.4,55 C228.3,53.6 230.3,52 232.2,50.6 C234.1,49.1 236.1,47.6 238,46.2 C239.9,44.8 241.9,43.4 243.8,42.1 C245.7,40.9 247.7,39.6 249.6,38.5 C251.5,37.4 253.5,36.4 255.4,35.5 C257.3,34.7 259.3,33.9 261.2,33.3 C263.1,32.7 265.1,32.3 267,32 C268.9,31.7 270.9,31.6 272.8,31.6 C274.7,31.6 276.7,31.8 278.6,32.2 C280.5,32.6 282.5,33.1 284.4,33.9 C286.3,34.6 288.3,35.5 290.2,36.5 C292.1,37.5 294.1,38.7 296,40 C297.9,41.3 299.9,42.8 301.8,44.3 C303.7,45.8 305.7,47.4 307.6,49.1 C309.5,50.8 311.5,52.6 313.4,54.3 C315.3,56 317.3,57.8 319.2,59.5 C321.1,61.2 323.1,62.9 325,64.5 C326.9,66 328.9,67.5 330.8,68.8 C332.7,70.1 334.7,71.3 336.6,72.3 C338.5,73.3 340.5,74.1 342.4,74.6 C344.3,75.2 346.3,75.5 348.2,75.5 C350.1,75.6 353,75.1 354,75" fill="none" stroke-width="4" stroke-linecap="round" stroke-dasharray="14 10" style="stroke: var(--rosa)"></path></svg></sc-if><span class="tsm">[{{it.k}}]</span><p class="tbase">{{it.v}}</p></div></sc-for></div></div></section><section ref="{{refs.funciona}}" id="funciona" class="rv ap"><div class="ap-bg" aria-hidden="true"><img ref="{{par.c}}" src="img/cruce-noche.jpg" alt=""></div><div class="ap-veil" aria-hidden="true"></div><div class="wrap row ap-row"><div class="ap-head"><h2 class="t5xl">Cómo<br>funciona</h2><p class="tlg" style="margin-top: 24px">Mide y corrige, todo el tiempo</p></div><div class="ap-list"><sc-for list="{{t.funciona}}" as="it" hint-placeholder-count="2"><div class="item"><h3 class="t3xl">{{it.k}}</h3><p class="tbase">{{it.v}}</p></div></sc-for></div></div></section><section ref="{{refs.numero}}" id="numero" class="rv sec"><div class="wrap row"><div class="n-left"><span class="tsm">[meta]</span><div class="bn"><span class="bn-n" style="color: var(--oliva)">20</span><span class="bn-u" style="color: var(--oliva)">dB</span></div></div><div class="n-right"><div class="g2"><sc-for list="{{t.numero}}" as="it" hint-placeholder-count="2"><div class="item"><span class="tsm">[{{it.k}}]</span><p class="tbase">{{it.v}}</p></div></sc-for></div></div></div></section><section ref="{{refs.calce}}" id="calce" class="rv sec"><div class="wrap"><h2 class="t5xl s-title low">el calce</h2><div class="row c-row"><div class="c-fig"><svg viewBox="0 0 480 240" class="cuerda" role="button" tabindex="0" aria-label="cambiar entre bien puesto y flojo" onPointerMove="{{cu.move}}" onPointerLeave="{{cu.leave}}" onClick="{{cu.toggle}}" onKeyDown="{{cu.key}}"><text x="24" y="222" class="c-lab">adentro</text><text x="456" y="222" text-anchor="end" class="c-lab">afuera</text><g class="c-aire {{cu.aire}}"><path d="M206,106 q-10,-6 -20,0 t-20,0" fill="none" stroke-width="1.6" stroke-linecap="round" opacity="0.60" style="stroke: var(--oliva)"></path><path d="M192,120 q-10,-6 -20,0 t-20,0" fill="none" stroke-width="1.6" stroke-linecap="round" opacity="0.43" style="stroke: var(--oliva)"></path><path d="M178,134 q-10,-6 -20,0 t-20,0" fill="none" stroke-width="1.6" stroke-linecap="round" opacity="0.26" style="stroke: var(--oliva)"></path></g><path ref="{{cu.ref}}" d="M240,0 L240,240" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="stroke: var(--carbon)"></path></svg></div><div class="c-side"><div class="c-btns"><button type="button" class="bk tnav c-btn {{cu.b_puesta}}" onClick="{{cu.set_puesta}}"><span class="b" aria-hidden="true">[</span><span>bien puesto</span><span class="b" aria-hidden="true">]</span></button><button type="button" class="bk tnav c-btn {{cu.b_floja}}" onClick="{{cu.set_floja}}"><span class="b" aria-hidden="true">[</span><span>flojo</span><span class="b" aria-hidden="true">]</span></button></div><div class="c-txts" aria-live="polite"><p class="tbase c-txt {{cu.t_puesta}}">La almohadilla sella el oído.</p><p class="tbase c-txt {{cu.t_floja}}">Se escapa un poco de aire: cancela menos y es más fácil que silbe.</p></div></div></div></div></section><section ref="{{refs.silbido}}" id="silbido" class="rv sec"><div class="wrap"><div class="row s-row"><div class="s-fig"><svg viewBox="0 0 520 140" class="s-onda {{sb.on}}" aria-hidden="true"><path ref="{{sb.ref}}" d="M8,70 L512,70" fill="none" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="s-path"></path></svg><div class="nums"><button type="button" class="item s-num {{sb.b_g300}}" onClick="{{sb.set_g300}}" aria-pressed="{{sb.p_g300}}"><span class="tsm">[de fábrica]</span><span class="tmid" style="color: var(--oliva)">300</span></button><button type="button" class="item s-num {{sb.b_g447}}" onClick="{{sb.set_g447}}" aria-pressed="{{sb.p_g447}}"><span class="tsm">[flojo, silba]</span><span class="tmid" style="color: var(--ladrillo)">447</span></button><button type="button" class="item s-num {{sb.b_g528}}" onClick="{{sb.set_g528}}" aria-pressed="{{sb.p_g528}}"><span class="tsm">[bien puesto, silba]</span><span class="tmid" style="color: var(--ladrillo)">528</span></button></div></div><div class="s-txt"><div class="g1"><sc-for list="{{t.silbido}}" as="it" hint-placeholder-count="2"><div class="item"><span class="tsm">[{{it.k}}]</span><p class="tbase">{{it.v}}</p></div></sc-for></div></div></div></div></section><section ref="{{refs.mic}}" id="mic" class="rv sec"><div class="wrap row m-row"><div class="m-txt"><h2 class="t5xl s-title low">el micrófono</h2><div class="g2"><sc-for list="{{t.mic}}" as="it" hint-placeholder-count="2"><div class="item"><span class="tsm">[{{it.k}}]</span><p class="tbase">{{it.v}}</p></div></sc-for></div></div><div class="m-img"><sc-if value="{{foto.vereda}}" hint-placeholder-val="{{ false }}"><img src="img/mic-vereda.jpg" alt="Chica con auriculares sentada en el cordón de una vereda" style="object-position: 50% 40%"></sc-if><sc-if value="{{foto.rojo}}" hint-placeholder-val="{{ false }}"><img src="img/mic-rojo.jpg" alt="Chica con un auricular intraural, ojos cerrados, delante de un taxi amarillo" style="object-position: 50% 30%"></sc-if><sc-if value="{{foto.bn}}" hint-placeholder-val="{{ false }}"><img src="img/mic-bn.jpg" alt="Retrato en blanco y negro de perfil con auriculares intraurales" style="object-position: 50% 40%"></sc-if><sc-if value="{{foto.blanca}}" hint-placeholder-val="{{ false }}"><img src="img/mic-blanca.jpg" alt="Chica de perfil con auricular intraural y camisa blanca" style="object-position: 50% 30%"></sc-if><sc-if value="{{foto.sillon}}" hint-placeholder-val="{{ true }}"><img src="img/mic-sillon.jpg" alt="Chica relajada en un sillón con auriculares amarillos" style="object-position: 60% 40%"></sc-if><sc-if value="{{foto.colgando}}" hint-placeholder-val="{{ false }}"><img src="img/mic-colgando.jpg" alt="Dos auriculares intraurales colgando de su cable, en gris" style="object-position: 50% 50%"></sc-if></div></div></section></main><footer ref="{{refs.fin}}" id="fin" class="ft"><div class="wrap ft-wrap"><div class="ft-head"><div class="ft-row"><div class="f-col"><p class="tsm f-label">[Menú]</p><ul class="f-list"><li><a class="tbase f-link" href="#ruido" onClick="{{go.ruido}}">El ruido</a></li><li><a class="tbase f-link" href="#funciona" onClick="{{go.funciona}}">Cómo funciona</a></li><li><a class="tbase f-link" href="#numero" onClick="{{go.numero}}">El número</a></li><li><a class="tbase f-link" href="#silbido" onClick="{{go.silbido}}">El silbido</a></li></ul></div><div class="f-col"><p class="tsm f-label">[Proyecto]</p><ul class="f-list"><li><a class="tbase f-link" href="{{t.repo}}">Código en GitHub ↗</a></li></ul></div><div class="f-col"><p class="tsm f-label">[Trabajo]</p><p class="tbase" style="max-width: 300px">{{t.trabajo}}</p></div></div><div class="f-col"><p class="tsm f-label">[Simulación]</p><p class="tbase" style="max-width: 320px">{{t.simulacion}}</p></div><button type="button" class="bk tnav ft-up" onClick="{{go.top}}"><span class="b" aria-hidden="true">[</span><span>↑ Volver arriba</span><span class="b" aria-hidden="true">]</span></button></div><div class="ft-bottom"><h2 class="ft-title" aria-label="gracias"><sc-for list="{{letras}}" as="l" hint-placeholder-count="7"><span aria-hidden="true" class="ltr" style="transition-delay: {{l.d}}ms">{{l.c}}</span></sc-for></h2></div></div></footer></div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"grano": {"editor": "boolean", "default": true}, "tema": {"editor": "enum", "options": ["F · oliva y crema", "A · cacao y rosa", "B · musgo y rosa", "C · crema y turquesa", "D · hueso y tinta", "E · salvia y crema"], "default": "A · cacao y rosa"}, "foto": {"editor": "enum", "options": ["según el tema", "en la vereda", "auricular rojo", "blanco y negro", "camisa blanca", "en el sillón", "colgando"], "default": "según el tema"}, "$preview": {"width": 1440, "height": 7600}}'>
+class Component extends DCLogic {
+  componentDidMount() {
+    const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (this._root && !reduce && 'IntersectionObserver' in window) {
+      this._root.setAttribute('data-anim', '');
+      // secciones: aparecen una vez. GRACIAS: entra cada vez que vuelve a verse.
+      this._io = new IntersectionObserver((entries) => {
+        entries.forEach((en) => {
+          const el = en.target;
+          if (el.id === 'fin') el.classList.toggle('in', en.isIntersecting);
+          else if (en.isIntersecting) { el.classList.add('in'); this._io.unobserve(el); }
+        });
+      }, { threshold: 0.15 });
+      Object.values(this._els || {}).forEach((el) => { if (el) this._io.observe(el); });
+    }
+    const loop = () => {
+      if (this._cu) this._cu.step(reduce);
+      if (this._sb) this._sb.step(reduce);
+      const el = this._par && this._par.c;
+      if (el && el.isConnected && !reduce) {
+        const vh = window.innerHeight || 1;
+        const box = el.parentElement.getBoundingClientRect();
+        if (box.bottom > 0 && box.top < vh) {
+          const p = Math.max(-1, Math.min(1, (box.top + box.height / 2 - vh / 2) / vh));
+          el.style.transform = 'translate3d(0,' + (p * 6).toFixed(2) + '%,0)';
+        }
+      }
+      this._raf = requestAnimationFrame(loop);
+    };
+    this._raf = requestAnimationFrame(loop);
+  }
+  cuerdas() {
+    const W = 480, H = 240, N = 48;
+    const B = { puesta: [240.5, 240.5, 240.4, 240.2, 239.8, 239.4, 239.0, 238.7, 238.5, 238.6, 238.9, 239.4, 239.9, 240.5, 241.0, 241.3, 241.4, 241.3, 241.0, 240.7, 240.3, 240.0, 239.8, 239.7, 239.7, 239.8, 239.9, 240.0, 240.0, 240.0, 239.9, 239.7, 239.5, 239.3, 239.2, 239.2, 239.3, 239.5, 239.7, 240.0, 240.3, 240.5, 240.7, 240.9, 240.9, 240.9, 240.9, 240.7, 240.6], floja: [239.9, 239.5, 239.1, 238.9, 238.8, 239.1, 239.6, 240.2, 240.8, 241.1, 241.0, 240.5, 239.8, 239.2, 238.6, 238.1, 237.4, 236.1, 234.1, 231.0, 227.1, 223.0, 219.2, 216.5, 215.4, 216.1, 218.4, 221.8, 225.8, 229.9, 233.6, 236.6, 238.8, 240.2, 240.6, 240.4, 239.8, 239.2, 238.8, 238.8, 239.1, 239.7, 240.2, 240.5, 240.6, 240.4, 240.1, 239.8, 239.7] };
+    const conf = { puesta: { max: 3, gain: 0.05, ease: 0.14, sig: 0.18 }, floja: { max: 7, gain: 0.09, ease: 0.08, sig: 0.24 } };
+    const path = (xs, ys) => {
+      let d = 'M' + xs[0].toFixed(1) + ',' + ys[0].toFixed(1);
+      for (let i = 0; i < xs.length - 1; i++) {
+        const i0 = Math.max(0, i - 1), i3 = Math.min(xs.length - 1, i + 2);
+        d += ' C' + (xs[i] + (xs[i + 1] - xs[i0]) / 6).toFixed(1) + ',' + (ys[i] + (ys[i + 1] - ys[i0]) / 6).toFixed(1) + ' ' +
+             (xs[i + 1] - (xs[i3] - xs[i]) / 6).toFixed(1) + ',' + (ys[i + 1] - (ys[i3] - ys[i]) / 6).toFixed(1) + ' ' + xs[i + 1].toFixed(1) + ',' + ys[i + 1].toFixed(1);
+      }
+      return d;
+    };
+    this._path = path;
+    const ys = Array.from({ length: N + 1 }, (_, i) => -4 + (H + 8) * i / N);
+    const st = { x: 0, v: 0, tgt: 0, y: 0.5, m: 0, el: null, last: '' };
+    const cur = () => ((this.state || {}).calce || 'puesta');
+    const set = (k) => { this.setState({ calce: k }); };
+    const pos = (e) => { const r = e.currentTarget.getBoundingClientRect(); return { px: (e.clientX - r.left) / (r.width || 1) * W, py: (e.clientY - r.top) / (r.height || 1) }; };
+    st.api = {
+      ref: (el) => { st.el = el; if (el) el.setAttribute('d', path(B.puesta, ys)); },
+      move: (e) => { const p = pos(e), c = conf[cur()]; st.y = Math.max(0.05, Math.min(0.95, p.py)); st.tgt = Math.max(-c.max, Math.min(c.max, (p.px - W / 2) * c.gain)); },
+      leave: () => { st.tgt = 0; },
+      toggle: () => set(cur() === 'puesta' ? 'floja' : 'puesta'),
+      key: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); set(cur() === 'puesta' ? 'floja' : 'puesta'); } },
+      set_puesta: () => set('puesta'),
+      set_floja: () => set('floja'),
+    };
+    st.step = (reduce) => {
+      const k = cur(), c = conf[k], mt = k === 'floja' ? 1 : 0;
+      st.m = reduce ? mt : st.m + (mt - st.m) * 0.08;
+      st.x = reduce ? st.tgt : st.x + (st.tgt - st.x) * c.ease;
+      if (!st.el) return;
+      const xs = B.puesta.map((bp, i) => bp + (B.floja[i] - bp) * st.m + st.x * Math.exp(-Math.pow((i / N - st.y) / c.sig, 2)));
+      const d = path(xs, ys);
+      if (d !== st.last) { st.el.setAttribute('d', d); st.last = d; }
+    };
+    this._cu = st;
+  }
+  silbido() {
+    const W = 520, H = 140, YC = H / 2, N = 160;
+    // 300: onda chica y lenta (el ruido que queda). 447 / 528: oscilación rápida que crece hasta el tope.
+    const conf = { g300: { a: 7, k: 2.2, w: 0.035 }, g447: { a: 34, k: 11, w: 0.32 }, g528: { a: 52, k: 13, w: 0.42 } };
+    const st = { a: 7, k: 2.2, w: 0.035, ph: 0.6, el: null, last: '' };
+    const cur = () => ((this.state || {}).gan || 'g447');
+    const path = this._path;
+    const xs = Array.from({ length: N + 1 }, (_, i) => 8 + (W - 16) * i / N);
+    st.api = {
+      ref: (el) => { st.el = el; },
+      set_g300: () => this.setState({ gan: 'g300' }), set_g447: () => this.setState({ gan: 'g447' }), set_g528: () => this.setState({ gan: 'g528' }),
+    };
+    st.step = (reduce) => {
+      const c = conf[cur()];
+      st.a += (c.a - st.a) * 0.04; st.k += (c.k - st.k) * 0.04; st.w += (c.w - st.w) * 0.05;
+      if (!st.el) return;
+      const ys = xs.map((x, i) => {
+        const u = i / N;
+        const env = 0.35 + 0.65 * u;            // crece hacia la derecha
+        const y = st.a * env * Math.sin(2 * Math.PI * st.k * u - st.ph) + 3 * Math.sin(2 * Math.PI * 1.3 * u + st.ph * 0.2);
+        return YC - 58 * Math.tanh(y / 58);     // tope suave
+      });
+      const d = path(xs, ys);
+      if (d !== st.last) { st.el.setAttribute('d', d); st.last = d; }
+    };
+    this._sb = st;
+  }
+  componentWillUnmount() { try { this._io && this._io.disconnect(); } catch (e) {} cancelAnimationFrame(this._raf); }
+  go(k, e) {
+    if (e) e.preventDefault();
+    const el = this._els && this._els[k]; if (!el) return;
+    // offsetTop no cuenta el desplazamiento de la animación de entrada, así cae justo en el borde de la sección
+    let y = 0, n = el;
+    while (n) { y += n.offsetTop; n = n.offsetParent; }
+    el.classList.add('in'); if (this._io) this._io.unobserve(el);
+    if (k === 'funciona') { const vh = window.innerHeight || 0, h = el.offsetHeight; if (h < vh) y -= (vh - h) / 2; }
+    window.scrollTo({ top: Math.max(0, y), behavior: 'smooth' });
+  }
+  renderVals() {
+    // contenido: para sumar o sacar ítems, editar esta lista
+    const t = {
+      "ruido": [
+        {
+          "k": "OMS",
+          "v": "53 dB es lo que recomienda para el ruido del tránsito, como promedio del día."
+        },
+        {
+          "k": "ley porteña",
+          "v": "70 dB es el tope de día en zonas comerciales. Al pie del Obelisco se pasa."
+        },
+        {
+          "k": "la cuenta",
+          "v": "76 − 25 = 51 dB: con el auricular cancelando, por debajo de lo que pide la OMS. Al menos en los graves."
+        },
+        {
+          "k": "fuente",
+          "v": "Universidad de Palermo y CESBA, medición diurna en Corrientes y 9 de Julio."
+        }
+      ],
+      "ves": [
+        {
+          "k": "afuera",
+          "v": "El ruido tal como llega al auricular.",
+          "m": "ruido"
+        },
+        {
+          "k": "adentro",
+          "v": "Lo que llega a tu oído.",
+          "m": "oido"
+        },
+        {
+          "k": "rosa",
+          "v": "El anti-ruido: lo que emite el auricular, al revés del ruido. Sumados, casi se borran.",
+          "m": "rosa"
+        }
+      ],
+      "funciona": [
+        {
+          "k": "Cancelar",
+          "v": "Un micrófono adentro del auricular escucha lo que queda y el parlante responde con lo opuesto. Mide y corrige miles de veces por segundo."
+        },
+        {
+          "k": "Almohadilla",
+          "v": "La goma frena sola los sonidos agudos. El auricular se ocupa de los graves: motores, tránsito, el colectivo."
+        }
+      ],
+      "numero": [
+        {
+          "k": "dB",
+          "v": "Cuánto más silencioso queda. 20 dB es diez veces menos presión de sonido."
+        },
+        {
+          "k": "meta 20",
+          "v": "Lo que pedimos como mínimo. Con los graves se cumple; con la bocina no llega, porque tiene agudos y esos los frena la almohadilla."
+        }
+      ],
+      "calce": [
+        {
+          "k": "bien puesto",
+          "v": "La almohadilla sella el oído.",
+          "m": "puesta"
+        },
+        {
+          "k": "flojo",
+          "v": "Se escapa un poco de aire: cancela menos y es más fácil que silbe.",
+          "m": "floja"
+        }
+      ],
+      "silbido": [
+        {
+          "k": "ganancia",
+          "v": "Qué tan fuerte corrige el auricular. Viene fija de fábrica en 300."
+        },
+        {
+          "k": "silba",
+          "v": "El auricular corrige con un pequeño atraso. Si corrige demasiado fuerte, la corrección llega tarde, empuja para el mismo lado que el ruido y se arma una oscilación."
+        },
+        {
+          "k": "límite",
+          "v": "Flojo, silba pasando 447; bien puesto, pasando 528. Por eso de fábrica se elige por debajo de 447."
+        }
+      ],
+      "mic": [
+        {
+          "k": "tu sala",
+          "v": "Con el micrófono, el ruido es el de donde estás."
+        },
+        {
+          "k": "auriculares",
+          "v": "Para escuchar el resultado, con auriculares: si sale por el parlante, el micrófono lo vuelve a escuchar y se acopla."
+        }
+      ],
+      "trabajo": "Trabajo final de Tecnologías para la Automatización, UTN FRBA.",
+      "simulacion": "La app corre el mismo modelo que el simulador del trabajo.",
+      "repo": "https://github.com/valentinarau/tfi-anc-simulacion"
+    };
+    const keys = ["top", "ruido", "ves", "funciona", "numero", "calce", "silbido", "mic", "fin"];
+    if (!this._refs) {
+      this._els = {}; this._refs = {}; this._go = {}; this._par = {}; this._parRefs = {};
+      keys.forEach((k) => {
+        this._refs[k] = (el) => { if (el && el !== this._els[k] && this._io) this._io.observe(el); this._els[k] = el; };
+        this._go[k] = (e) => this.go(k, e);
+      });
+      ['c'].forEach((k) => { this._parRefs[k] = (el) => { this._par[k] = el; }; });
+      this._rootRef = (el) => { this._root = el; };
+      this.cuerdas();
+      this.silbido();
+    }
+    const marks = (list, kinds) => list.map((it) => { const o = { k: it.k, v: it.v }; kinds.forEach((m) => { o['m_' + m] = it.m === m; }); return o; });
+    const tm = { ves: marks(t.ves, ['ruido', 'oido', 'rosa']), calce: marks(t.calce, ['puesta', 'floja']) };
+    const temas = ["F · oliva y crema", "A · cacao y rosa", "B · musgo y rosa", "C · crema y turquesa", "D · hueso y tinta", "E · salvia y crema"], temaFoto = ["vereda", "sillon", "rojo", "blanca", "bn", "colgando"], nombres = {"vereda": "en la vereda", "rojo": "auricular rojo", "bn": "blanco y negro", "blanca": "camisa blanca", "sillon": "en el sillón", "colgando": "colgando"};
+    const ti = Math.max(0, temas.indexOf(this.props.tema ?? temas[1]));
+    const fsel = this.props.foto ?? 'según el tema';
+    let key = temaFoto[ti];
+    Object.keys(nombres).forEach((k) => { if (nombres[k] === fsel) key = k; });
+    const foto = {}; Object.keys(nombres).forEach((k) => { foto[k] = k === key; });
+    const letras = 'gracias'.split('').map((c, i) => ({ c, d: 80 + i * 70 }));
+    return { grano: this.props.grano ?? true, t, tm, refs: this._refs, go: this._go, par: this._parRefs, rootRef: this._rootRef,
+             temaClass: 't' + ti, foto, letras, sb: Object.assign({}, this._sb.api, (() => { const g = ((this.state || {}).gan || 'g447'); const o = { on: g === 'g300' ? '' : 'on' };
+               ['g300', 'g447', 'g528'].forEach((k) => { o['b_' + k] = g === k ? 'on' : ''; o['p_' + k] = g === k ? 'true' : 'false'; }); return o; })()), cu: Object.assign({}, this._cu.api, (() => { const k = ((this.state || {}).calce || 'puesta'); return {
+               b_puesta: k === 'puesta' ? 'on' : '', b_floja: k === 'floja' ? 'on' : '', t_puesta: k === 'puesta' ? 'on' : '', t_floja: k === 'floja' ? 'on' : '', aire: k === 'floja' ? 'on' : '' }; })()) };
+  }
+}
+</script>
+</body>
+</html>
