@@ -106,3 +106,13 @@ Actualización (13/11/2026, 6): diseño final de la página de información en `
 con la especificación para construirla en `web/referencia/INFO.md` y sus fotos en `web/referencia/img/`.
 `Prototipo.dc.html` actualizado (indicador "ganancia 300 → N" con marca de límite y enlace "[info] →" en el "?").
 Próximo paso: Claude Code construye la página de información en `web/` y suma esos dos cambios a la app.
+Actualización (13/11/2026, 7): micrófono y sample pasan por una "almohadilla pasiva" (pasabajos de 2.º orden
+en 1 kHz, suposición de la app, no del informe) antes de entrar al lazo; afuera se dibuja el sonido completo.
+Escala mínima del dibujo del micrófono: 0,1 Pa. Mediciones en silencio: MacBook −50,6 dBFS (casi todo debajo
+de 300 Hz), AirPods −69,6 dBFS (soplido de 3 a 10 kHz); el modelo deja eso en −78 / −95 dBFS, sin umbral de
+silencio. El soplido audible con AirPods probablemente sea el modo llamada de Bluetooth (24 kHz). Ver `web/README.md`.
+
+Actualización (13/11/2026, 8): página de información construida en `web/info.html` (+ `info.css`, `info.js`, fotos en
+`web/img/`), según `web/referencia/INFO.md`; usa la paleta que la app guarda al tocar [tema]. En la app: indicador
+"ganancia 300 → N" con marca de límite (447 flojo / 528 puesto, los de la fórmula) y "[info] →" en el "?". La tensión
+de la línea ahora llega al máximo en el límite del calce actual. Falta confirmar origen y licencia de las 8 fotos.

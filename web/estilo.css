@@ -85,3 +85,7 @@ html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparen
 #lienzo, #lienzo * { -webkit-touch-callout: none; }
 .vertical #ayuda span { font-size: 42px !important; }
 .vertical #ayuda > div:last-child { font-size: 30px !important; }
+/* Indicador de ganancia y enlace [info] en el celular parado: más grandes, junto a la línea. */
+.vertical #ganancia { left: 60px !important; top: 560px !important; transform: scale(1.8); transform-origin: 0 0; }
+.vertical #infoLink { font-size: 34px !important; }
+#infoLink:hover { color: var(--carbon) !important; }

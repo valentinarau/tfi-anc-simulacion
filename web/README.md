@@ -18,8 +18,8 @@ Lo que se oye, las ondas y los dB salen de **la misma simulación que `simulacio
 | Tocar **[tema]** | — | Pasa por las 6 paletas del prototipo (t0 es la elegida) |
 | Tocar **cancelar** | espacio | Enciende o apaga la rama de realimentación (u = Kp·e) |
 | Tocar la línea | F | Afloja o aprieta el auricular: mal calce (K = 0,6; τ = 0,5 ms) o buen calce (K = 1; τ = 1 ms) |
-| Mantener apretada la línea | mantener G | Kp sube desde 300 (73,5 por segundo); al soltar vuelve a 300. Silba cuando pasa el límite: ~447 flojo, ~528 puesto |
-| ? | ? | Qué estoy viendo. Esc cierra |
+| Mantener apretada la línea | mantener G | Kp sube desde 300 (73,5 por segundo); al soltar vuelve a 300. Silba cuando pasa el límite: ~447 flojo, ~528 puesto. Al lado de la línea aparece "ganancia 300 → N" con una barrita, un punto en N y una marca en el límite; se pone ladrillo al pasarlo |
+| ? | ? | Qué estoy viendo. Esc cierra. El enlace **[info] →** lleva a la página de información |
 
 Adentro del auricular se dibujan: en oliva fino, el ruido que entra por la vía pasiva (c sin ANC); en rosa
 punteado, lo que agrega el auricular (c − c sin ANC); en carbón, lo que oís (c). El número es la
@@ -29,6 +29,35 @@ atenuación medida en la simulación: 20·log10 del valor eficaz sin ANC sobre e
 **Con el micrófono, escuchar solo con auriculares**: con parlantes, el sonido vuelve a entrar al
 micrófono y se acopla. La app pregunta antes y, si no hay auriculares, muestra las ondas sin sonido.
 
+### Micrófono y sample: la almohadilla pasiva (suposición de la app)
+
+**Esto no es un dato del informe: es una suposición que agrega la app.** El informe modela el ruido que
+llega al oído como d, sin decir cuánto frena la punta de silicona del auricular. Los ruidos generados
+(tránsito, bocina, colectivo) ya están definidos así en `simulacion_anc.py` y no se tocan. Pero el
+micrófono y el sample traen todo el espectro, incluido el soplido propio del micrófono de la compu, que
+cae entre 3 y 10 kHz, justo donde el lazo ya no atenúa (amplifica unos 5 a 8 dB).
+
+Por eso, solo con micrófono y sample, antes de entrar al lazo el sonido pasa por una "almohadilla": un
+pasabajos de 2.º orden en 1 kHz (−3 dB a 1 kHz, ~−19 dB a 3 kHz, ~−31 dB a 6 kHz; `ALMOHADILLA_FC` en
+`motor.js`). Afuera, en oliva, se dibuja el sonido completo; adentro, lo que pasa la almohadilla.
+
+El dibujo del micrófono y del sample usa una escala automática, pero nunca más grande que la de un ruido
+de 0,1 Pa eficaces (`ESCALA_MIN_PA` en `app.js`): así una sala tranquila se ve tranquila.
+
+Lo que se midió (13/11/2026, 6 s de sala en silencio, sin procesar, igual que pide la app):
+
+| Micrófono | Nivel | Dónde está la energía | Qué sale del modelo (sin almohadilla) |
+|---|---|---|---|
+| MacBook Pro | −50,6 dBFS (0,020 Pa en la app) | 95 % por debajo de 300 Hz (zumbido de la sala), 0,1 % entre 3 y 10 kHz | −78 dBFS con ANC |
+| AirPods (entrada por defecto del sistema, 24 kHz) | −69,6 dBFS (0,002 Pa) | 60 % entre 3 y 10 kHz (soplido) | −95 dBFS con ANC |
+
+El proceso pasivo (τ = 1 ms) ya frena mucho los agudos, así que lo que se oye del modelo queda muy bajo
+aun sin almohadilla. Lo que más se notaba era el dibujo: el micrófono de la MacBook en silencio daba
+justo el mínimo de escala anterior (0,02 Pa) y se veía como un ruido fuerte. No hizo falta un umbral de
+silencio. **Si se escucha soplido con AirPods**, lo más probable es el modo llamada de Bluetooth: cuando
+una página abre el micrófono de los AirPods, el sistema los pasa a 24 kHz y el audio pierde calidad.
+Para evitarlo, elegir en el navegador el micrófono de la compu y dejar los AirPods solo para escuchar.
+
 ## Archivos
 
 | Archivo | Qué es |
@@ -36,12 +65,30 @@ micrófono y se acopla. La app pregunta antes y, si no hay auriculares, muestra 
 | `index.html` | La página (lienzo de 1920 × 1080 que se escala a la pantalla) |
 | `estilo.css` | Paletas t0 a t5, textura de papel, disposición vertical para celular |
 | `grano.png` | Textura de papel del prototipo |
+| `info.html`, `info.css`, `info.js` | Página de información ("cómo se borra el ruido"), ver abajo |
+| `img/` | Fotos de la página de información |
 | `app.js` | Interfaz: estados, teclado, gestos y dibujo de las ondas con los datos de la simulación |
 | `procesador.js` | AudioWorklet: corre el lazo a la frecuencia del audio y le manda las señales a la interfaz |
 | `motor.js` | El lazo (traducción de `LazoANC.paso`), los ruidos y la clase `Demo` |
 | `test/comparar.js` | Verificación contra Python (ver abajo) |
 | `test/referencia_python.py` | Genera `test/referencia_python.json` con `simulacion_anc.py` sin modificarlo |
 | `referencia/` | Diseño de referencia (no ejecutable, ver su README) |
+
+## Página de información
+
+`info.html` explica lo que se ve en la app, para cualquier persona. Se llega desde el "?" de la app
+("[info] →") y se vuelve con "← App" o tocando "Borrar el ruido". Está construida según
+`referencia/INFO.md` y `referencia/Info.dc.html`: mismos textos, estilos, fotos y comportamiento
+(revelado al scrollear, menú con desplazamiento suave, parallax, "el calce" y "el silbido" interactivos,
+GRACIAS que entra cada vez que se llega al pie).
+
+- **Paleta:** usa la misma que la app. Al tocar [tema], la app la guarda en el navegador y la página la lee
+  (sin guardado, arranca en t0). La foto del micrófono cambia con la paleta.
+- **Límites del silbido:** la página y el indicador de la app dicen 447 y 528 (la fórmula del informe). El
+  lazo simulado oscila desde 441 / 521, pero la app recién muestra el silbido cuando lo detecta, alrededor de
+  452 / 533: pasando 447 y 528, como dice la página.
+- **Fotos:** se buscaron en sitios de fotos libres durante el diseño y no quedó registrado su origen.
+  **Antes de difundir la página, confirmar el origen y la licencia de cada una.**
 
 ## Probarla en la compu
 
@@ -105,5 +152,10 @@ pago (GitHub Pro, Team o Enterprise); con el plan gratuito, el repositorio tiene
 - **Silbido:** no hay un tiempo fijo (el prototipo silbaba a los 2 s solo si estaba flojo). Silba cuando
   el modelo satura el parlante o amplifica en lugar de atenuar: flojo a los ~2,1 s (Kp ≈ 450), puesto a
   los ~3,2 s (Kp ≈ 530).
+- **Indicador de ganancia y tensión de la línea:** como en el prototipo final, la línea se tensa del todo al llegar al
+  límite del calce actual (447 flojo, 528 puesto); antes se tensaba siempre hasta 447. El indicador va junto a la línea
+  (la posición por defecto del prototipo); en el celular parado, más grande y debajo de la frase.
+- **Almohadilla pasiva:** con micrófono y sample, el sonido que entra al lazo pasa antes por un pasabajos
+  de 1 kHz (ver "Micrófono y sample" arriba). El prototipo no lo tenía.
 - **Bocina:** tránsito a la mitad y una bocina de 1 s cada 3 s (420 Hz y armónicos, subida de 5 ms como
   en Python), en lugar de la envolvente de 0,15 s del dibujo.

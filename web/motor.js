@@ -192,6 +192,33 @@ export const CAMBIO = 0.6;        // [s] fundido al cambiar de ruido
 export const SALIDA = 0.15;       // escala de audio: 1 Pa en el oído -> 0,15 de fondo de escala
 export const MIC_PA = 1 / SALIDA; // escala del micrófono: así, sin ANC y con K = 1, sale lo que entra
 
+// Almohadilla pasiva (suposición de la app, no es un dato del informe): la punta de silicona del
+// auricular frena los agudos antes de que lleguen al oído y al micrófono interno. Se aplica solo al
+// micrófono y al sample, que traen todo el espectro (incluido el soplido propio del micrófono de la
+// compu, casi todo entre 3 y 10 kHz, justo donde el lazo ya no atenúa). Los ruidos generados quedan
+// como en Python. Pasabajos de 2.º orden (Butterworth) en 1 kHz: −3 dB a 1 kHz, ~−19 dB a 3 kHz,
+// ~−31 dB a 6 kHz.
+export const ALMOHADILLA_FC = 1000;   // [Hz]
+export const ALMOHADILLA_EN = ['mic', 'sample'];
+
+export class Pasabajos2 {
+  constructor(fc, sr) {
+    // Biquad pasabajos (fórmulas de R. Bristow-Johnson), Q = 1/√2
+    const w0 = 2 * Math.PI * fc / sr, al = Math.sin(w0) / (2 * Math.SQRT1_2), cw = Math.cos(w0);
+    const a0 = 1 + al;
+    this.b0 = (1 - cw) / 2 / a0; this.b1 = (1 - cw) / a0; this.b2 = this.b0;
+    this.a1 = -2 * cw / a0; this.a2 = (1 - al) / a0;
+    this.reiniciar();
+  }
+  reiniciar() { this.z1 = 0; this.z2 = 0; }
+  paso(x) {
+    const y = this.b0 * x + this.z1;
+    this.z1 = this.b1 * x - this.a1 * y + this.z2;
+    this.z2 = this.b2 * x - this.a2 * y;
+    return y;
+  }
+}
+
 export class Demo {
   constructor(sr, seed = 1) {
     this.sr = sr;
@@ -212,6 +239,14 @@ export class Demo {
     this.dAnt = 0;
     this.bocinaEnv = 0;
     this.sample = null; this.sampleGanancia = 0;
+    this.almohadilla = {};
+    for (const f of ALMOHADILLA_EN) this.almohadilla[f] = new Pasabajos2(ALMOHADILLA_FC, sr);
+  }
+
+  // Lo que pasa la almohadilla (solo micrófono y sample; el resto pasa igual).
+  pasarAlmohadilla(nombre, v) {
+    const f = this.almohadilla[nombre];
+    return f ? f.paso(v) : v;
   }
 
   // Mensajes de la interfaz: { fuente, anc, calce, apretar, sonido, sample }
@@ -225,6 +260,7 @@ export class Demo {
     }
     if ('fuente' in m && m.fuente !== this.fuente) {
       this.fuenteAntes = this.fuente; this.fuente = m.fuente; this.tFuente = this.t;
+      if (this.almohadilla[m.fuente]) this.almohadilla[m.fuente].reiniciar();
     }
     if ('anc' in m) this.lazo.anc = !!m.anc;
     if ('calce' in m) this.lazo.setCalce(m.calce);
@@ -253,6 +289,8 @@ export class Demo {
 
   // Procesa n muestras. entrada: muestras del micrófono (o null). Devuelve en las salidas
   // d, cOff y c de cada muestra (Pa) y en audio la señal para los auriculares.
+  // d es lo que entra al lazo (después de la almohadilla); si sal trae fuera, ahí va el sonido
+  // completo de afuera, el que se dibuja en oliva.
   procesar(entrada, audio, n, sal) {
     const lazo = this.lazo, dtA = 1 / this.sr;
     let sat = 0, env = 0;
@@ -261,12 +299,15 @@ export class Demo {
       const x = entrada ? entrada[i] : 0;
       const tt = this.t - this.tFuente;
       this.bocinaEnv = 0;
-      let d = this.valorFuente(this.fuente, tt, x);
+      let fuera = this.valorFuente(this.fuente, tt, x);
       env = Math.max(env, this.bocinaEnv);
+      let d = this.pasarAlmohadilla(this.fuente, fuera);
       if (this.fuenteAntes !== null && tt < CAMBIO) {
         const k = tt / CAMBIO;
         // la fuente anterior sigue su propio tiempo
-        d = k * d + (1 - k) * this.valorFuente(this.fuenteAntes, this.t, x);
+        const vA = this.valorFuente(this.fuenteAntes, this.t, x);
+        fuera = k * fuera + (1 - k) * vA;
+        d = k * d + (1 - k) * this.pasarAlmohadilla(this.fuenteAntes, vA);
       }
       this.acum += this.pasosPorMuestra;
       const np = Math.floor(this.acum);
@@ -274,7 +315,7 @@ export class Demo {
       sat += lazo.pasos(this.dAnt, d, np);
       this.dAnt = d;
       this.t += dtA;
-      if (sal) { sal.d[i] = d; sal.cOff[i] = lazo.cOff; sal.c[i] = lazo.c; }
+      if (sal) { sal.d[i] = d; sal.cOff[i] = lazo.cOff; sal.c[i] = lazo.c; if (sal.fuera) sal.fuera[i] = fuera; }
       if (audio) audio[i] = this.sonido ? Math.tanh(SALIDA * lazo.c) : 0;
     }
     return { sat, env };

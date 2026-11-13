@@ -28,8 +28,16 @@ const NOMBRES = ['tránsito', 'bocina', 'colectivo', 'micrófono'];
 const FUENTE = { 'tránsito': 'transito', bocina: 'bocina', colectivo: 'colectivo', mic: 'mic', sample: 'sample' };
 const TEMAS = 6;                          // paletas t0 a t5 del prototipo
 const KP_NOMINAL = 300, KP_FLOJO = 447;   // la línea se tensa del todo cuando Kp llega al límite flojo
+// Límites de la fórmula del informe (los mismos que dicen el indicador y la página de información).
+// El lazo simulado silba apenas pasándolos: ~452 flojo y ~533 puesto (ver web/README.md).
+const KP_PUESTO = 528;
+const limite = () => (s.loose ? KP_FLOJO : KP_PUESTO);
+let kpSoltar = KP_NOMINAL;               // Kp al soltar: el indicador lo muestra mientras se desvanece
 const RETARDO_ANC = 300;                  // [ms] el pulso llega de la oreja a la línea y el lazo arranca
 // Escala de dibujo [px/Pa]: el ruido de cada fuente ocupa lo mismo que en el prototipo.
+// Micrófono y sample: escala automática, pero nunca más grande que la de un ruido de 0,1 Pa eficaces
+// (~74 dB SPL). Así una sala tranquila (el micrófono de la notebook en silencio da ~0,02 Pa) se ve tranquila.
+const ESCALA_MIN_PA = 0.1;
 const ESCALA = { transito: A / (2.5 * 0.36), bocina: A / (2.5 * 0.36), colectivo: A / (2.0 * 0.63) };
 const LIM = 1.4 * A;                      // recorte suave del trazo (la bocina y el silbido no se salen)
 const soft = (v) => LIM * Math.tanh(v / LIM);
@@ -63,7 +71,7 @@ function ensureAudio() {
   try { ac = new AC({ sampleRate: 48000, latencyHint: 'interactive' }); } catch (e) { ac = new AC(); }
   SR = ac.sampleRate; NW = Math.round(VENTANA * SR); RING = Math.round(0.4 * SR);
   ring = { d: new Float32Array(RING), cOff: new Float32Array(RING), c: new Float32Array(RING), lp: new Float32Array(RING) };
-  cargando = ac.audioWorklet.addModule('procesador.js').then(() => {
+  cargando = ac.audioWorklet.addModule('procesador.js?v=2').then(() => {
     nodo = new AudioWorkletNode(ac, 'anc', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2] });
     nodo.connect(ac.destination);
     nodo.port.onmessage = (e) => recibir(e.data);
@@ -84,10 +92,12 @@ function sincronizar() {
 function recibir(m) {
   const n = m.d.length, a = 1 - Math.exp(-2 * Math.PI * 40 / SR);   // pasabajos de 40 Hz para el disparo
   let sOff = 0, sOn = 0;
+  // Afuera (oliva) se dibuja el sonido completo; con micrófono o sample, al lazo entra lo que pasa la almohadilla.
+  const dF = m.fuera || m.d;
   for (let i = 0; i < n; i++) {
     const k = (tot + i) % RING;
-    ring.d[k] = m.d[i]; ring.cOff[k] = m.cOff[i]; ring.c[k] = m.c[i];
-    lpD += a * (m.d[i] - lpD); ring.lp[k] = lpD;
+    ring.d[k] = dF[i]; ring.cOff[k] = m.cOff[i]; ring.c[k] = m.c[i];
+    lpD += a * (dF[i] - lpD); ring.lp[k] = lpD;
     sOff += m.cOff[i] * m.cOff[i]; sOn += m.c[i] * m.c[i];
   }
   tot += n;
@@ -206,7 +216,18 @@ function volverAlInicio() {
 }
 function nextTheme() {
   s.theme = ((s.theme || 0) + 1) % TEMAS;
-  el.escena.className = 'tema t' + s.theme;
+  aplicarTema();
+  guardarTema();
+}
+// La paleta elegida se recuerda (en este navegador) para que la página de información use la misma.
+// Cambia solo la clase de la paleta (así no se pierde la clase "vertical" del celular parado).
+function aplicarTema() {
+  for (let i = 0; i < TEMAS; i++) el.escena.classList.toggle('t' + i, i === s.theme);
+  el.escena.classList.add('tema');
+}
+function guardarTema() { try { localStorage.setItem('anc-tema', String(s.theme)); } catch (e) { /* sin almacenamiento */ } }
+function leerTema() {
+  try { const n = parseInt(localStorage.getItem('anc-tema'), 10); return n >= 0 && n < TEMAS ? n : 0; } catch (e) { return 0; }
 }
 // 05 sample: un archivo de audio propio, en loop, que entra al lazo como cualquier otro ruido.
 async function onFile(e) {
@@ -244,6 +265,7 @@ function squeezeEnd() {
   if (!s.sqAt) return;
   clearTimeout(timerSq);
   const sq = n >= s.sqAt ? tension() : 0;
+  kpSoltar = n >= s.sqAt ? est.Kp : KP_NOMINAL;
   Object.assign(s, { sqAt: null, relAt: n, relSq: sq });
   apretando = false;
   sincronizar();
@@ -318,7 +340,8 @@ function keyUp(e) {
 }
 
 // Tensión de la línea: sigue a Kp en el modelo (0 con Kp = 300, 1 al llegar al límite flojo, 447).
-function tension() { return cl((est.Kp - KP_NOMINAL) / (KP_FLOJO - KP_NOMINAL)); }
+// Como en el prototipo final, el límite depende del calce: 447 flojo, 528 puesto.
+function tension() { return cl((est.Kp - KP_NOMINAL) / (limite() - KP_NOMINAL)); }
 
 // ---------------------------------------------------------------- dibujo
 let wl = 0, ultimo = 0, esc = ESCALA.transito, micRms = 0.05, phr = null, phrAt = 0;
@@ -348,7 +371,7 @@ function dibujar(tt, dt) {
     let q = 0; for (let i = 0; i < NW; i += 4) q += disp.d[i] * disp.d[i];
     micRms += 0.05 * (Math.sqrt(q / (NW / 4)) - micRms);
   }
-  const escObj = auto ? A / (2.5 * Math.max(micRms, 0.02)) : (ESCALA[fuente] || esc);
+  const escObj = auto ? A / (2.5 * Math.max(micRms, ESCALA_MIN_PA)) : (ESCALA[fuente] || esc);
   esc += 0.15 * (escObj - esc);
 
   // trazos
@@ -464,6 +487,20 @@ function dibujar(tt, dt) {
   el.sample.style.fontWeight = sOn ? 600 : 400;
   el.sample.querySelector('.icono').style.visibility = sOn ? 'visible' : 'hidden';
 
+  // Indicador "ganancia 300 → N": mientras se aprieta la línea; al soltar se desvanece en 0,3 s.
+  const gOp = sqOn ? 1 : (s.relAt ? 1 - cl((tt - s.relAt) / 300) : 0);
+  el.ganancia.hidden = gOp <= 0.01;
+  if (gOp > 0.01) {
+    const kp = sqOn ? est.Kp : kpSoltar, lim = limite();
+    el.ganancia.style.opacity = gOp.toFixed(2);
+    el.ganancia.style.color = kp > lim ? 'var(--ladrillo)' : 'var(--carbon)';
+    el.gKp.textContent = Math.round(kp);
+    el.gPunto.setAttribute('cx', (230 * cl((kp - KP_NOMINAL) / 400)).toFixed(1));
+    const lx = (230 * (lim - KP_NOMINAL) / 400).toFixed(1);
+    el.gLim.setAttribute('x1', lx); el.gLim.setAttribute('x2', lx);
+    el.gLimTxt.setAttribute('x', lx); el.gLimTxt.textContent = lim;
+  }
+
   const hA = cl((tt - s.helpAt) / 350);
   el.ayudaCapa.hidden = !s.help;
   el.ayuda.style.opacity = hA.toFixed(2);
@@ -497,7 +534,10 @@ function ajustar() {
 
 function iniciar() {
   for (const id of ['escena', 'lienzo', 'region', 'out', 'ghost', 'anti', 'resid', 'line', 'pulso1', 'pulso2', 'frase', 'numero', 'numVal',
-    'cancelar', 'cCirc', 'cDot', 'oreja', 'pedir', 'bloqueado', 'auris', 'ayudaCapa', 'ayuda', 'sample']) el[id] = $(id);
+    'cancelar', 'cCirc', 'cDot', 'oreja', 'pedir', 'bloqueado', 'auris', 'ayudaCapa', 'ayuda', 'sample',
+    'ganancia', 'gKp', 'gPunto', 'gLim', 'gLimTxt']) el[id] = $(id);
+  s.theme = leerTema();
+  aplicarTema();
   el.items = Array.from(document.querySelectorAll('.item'));
   el.items.forEach((bt) => bt.addEventListener('click', () => pick(NOMBRES[+bt.dataset.i])));
   el.cancelar.addEventListener('click', toggleCancel);
