@@ -180,6 +180,7 @@ export function envolventeBocina(tt, dur) {
 //   bocina     tránsito a la mitad + bocina de 1 s cada 3 s (100 dB SPL)
 //   colectivo  colectivo en ralentí (90 dB SPL)
 //   mic        el micrófono de la compu
+//   sample     un archivo de audio cargado por el usuario, en loop, llevado al nivel del tránsito
 // Salida de audio: c (lo que oís), con la rama de realimentación encendida o apagada.
 
 export const KP_NOMINAL = 300;
@@ -210,10 +211,18 @@ export class Demo {
     this.sonido = false;
     this.dAnt = 0;
     this.bocinaEnv = 0;
+    this.sample = null; this.sampleGanancia = 0;
   }
 
-  // Mensajes de la interfaz: { fuente, anc, calce, apretar, sonido, reiniciar }
+  // Mensajes de la interfaz: { fuente, anc, calce, apretar, sonido, sample }
   mensaje(m) {
+    if (m.sample) {
+      // Audio de un archivo (a la frecuencia del audio). Se lleva al valor eficaz del tránsito.
+      const b = m.sample;
+      let q = 0; for (let i = 0; i < b.length; i++) q += b[i] * b[i];
+      const ef = Math.sqrt(q / Math.max(1, b.length));
+      this.sample = b; this.sampleGanancia = ef > 1e-6 ? NIVEL.transito / ef : 0;
+    }
     if ('fuente' in m && m.fuente !== this.fuente) {
       this.fuenteAntes = this.fuente; this.fuente = m.fuente; this.tFuente = this.t;
     }
@@ -235,6 +244,10 @@ export class Demo {
       return fondo + (env > 0 ? env * valorTonos(this.tonos.bocina, ph) : 0);
     }
     if (nombre === 'mic') return x * MIC_PA;
+    if (nombre === 'sample') {
+      const b = this.sample;
+      return b ? b[Math.floor(tt * this.sr) % b.length] * this.sampleGanancia : 0;
+    }
     return 0;
   }
 

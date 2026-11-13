@@ -90,3 +90,7 @@ El lazo simulado oscila desde Kp 521 / 441 (1,3 % debajo de la fórmula 528 / 44
 Publicación: workflow `.github/workflows/pages.yml` (falta activar Pages → Source: GitHub Actions).
 Diferencias con el prototipo (cartel real del micrófono, sin sample ni tema, etc.) en `web/README.md`.
 Pendiente: probar el micrófono real con auriculares (en el panel de Claude el micrófono está bloqueado).
+
+Actualización (13/11/2026, 3): en la app web volvieron "05 sample" (archivo propio, en loop, al nivel del tránsito)
+y el botón [tema] con las 6 paletas del prototipo (sin las teclas 5 y T). Tocar el título vuelve al inicio.
+Las ondas derivan despacio (~0,12 ventanas/s) para que el colectivo no quede quieto.

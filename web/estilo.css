@@ -1,4 +1,4 @@
-/* borrar el ruido: paleta t0 del prototipo (web/referencia/Prototipo.dc.html) */
+/* borrar el ruido: paletas del prototipo (web/referencia/Prototipo.dc.html); t0 es la elegida */
 .t0 {
   --papel: #F2E3C8;
   --oliva: #55603A;
@@ -8,12 +8,21 @@
   --ladrillo: #9E3B2C;
   --relleno: #E8D5B3;
 }
+/* Las otras cinco paletas del prototipo (botón [tema]) */
+.t1{--papel:#F3DED8;--oliva:#5C3F33;--carbon:#2A1F1A;--suave:#6E5550;--rosa:#9E4A5E;--ladrillo:#8E2B32;--relleno:#E8CFC8}
+.t2{--papel:#F4DFDB;--oliva:#4E6A55;--carbon:#23281F;--suave:#66605C;--rosa:#A84F66;--ladrillo:#8E2B3A;--relleno:#EBCFC9}
+.t3{--papel:#F4EEDF;--oliva:#4F8682;--carbon:#24302F;--suave:#5E6560;--rosa:#B0613F;--ladrillo:#9C3A22;--relleno:#E9E1CD}
+.t4{--papel:#EEEBE4;--oliva:#2B2A28;--carbon:#1E1D1B;--suave:#5F5C56;--rosa:#2F4FBF;--ladrillo:#C2402A;--relleno:#E2DED4}
+.t5{--papel:#F3EEE2;--oliva:#6C8570;--carbon:#222A23;--suave:#5F625C;--rosa:#B0654A;--ladrillo:#9C3A22;--relleno:#E7E0CF}
+.tema{transition: background-color .6s}
+.tema *{transition: color .6s, background-color .6s, border-color .6s}
 
 html, body {
   margin: 0;
   height: 100%;
   overflow: hidden;
   background: #F2E3C8;
+  transition: background-color .6s;
 }
 
 a { color: #2B2618; }

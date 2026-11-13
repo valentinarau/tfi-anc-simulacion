@@ -17,7 +17,8 @@ const jit = (x) => 1.4 * (Math.sin(x * 0.031 + 1) + 0.6 * Math.sin(x * 0.017 + 2
 const now = () => performance.now();
 
 const NOMBRES = ['tránsito', 'bocina', 'colectivo', 'micrófono'];
-const FUENTE = { 'tránsito': 'transito', bocina: 'bocina', colectivo: 'colectivo', mic: 'mic' };
+const FUENTE = { 'tránsito': 'transito', bocina: 'bocina', colectivo: 'colectivo', mic: 'mic', sample: 'sample' };
+const TEMAS = 6;                          // paletas t0 a t5 del prototipo
 const KP_NOMINAL = 300, KP_FLOJO = 447;   // la línea se tensa del todo cuando Kp llega al límite flojo
 const RETARDO_ANC = 300;                  // [ms] el pulso llega de la oreja a la línea y el lazo arranca
 // Escala de dibujo [px/Pa]: el ruido de cada fuente ocupa lo mismo que en el prototipo.
@@ -34,7 +35,9 @@ const s = {
   sqAt: null, relAt: 0, relSq: 0,
   mic: 'none', phones: false,
   help: false, helpAt: 0,
+  theme: 0,
 };
+let sampleCargado = false;
 let lazoAnc = false;      // rama de realimentación encendida en el modelo
 let apretando = false;    // Kp subiendo en el modelo
 let timerAnc = null, timerSq = null;
@@ -92,16 +95,29 @@ function recibir(m) {
 // Últimos VENTANA segundos, empezando en un cruce por cero del ruido (como un osciloscopio).
 const snap = { d: null, cOff: null, c: null };
 const disp = { d: null, cOff: null, c: null, anti: null, listo: false };
-function instantanea() {
+let periodo = 0;                          // muestras entre cruces por cero del ruido
+const DERIVA = 0.12;                      // ventanas por segundo
+function instantanea(tt) {
   if (!ring || tot < NW + RING / 4) return false;
   if (!snap.d || snap.d.length !== NW) {
     for (const k of ['d', 'cOff', 'c']) { snap[k] = new Float32Array(NW); disp[k] = new Float32Array(NW); }
     disp.anti = new Float32Array(NW); disp.listo = false;
   }
+  // Disparo + deriva: la ventana arranca en un cruce por cero y se corre despacio dentro del período
+  // (en el prototipo las ondas avanzan ~0,12 ventanas por segundo). Sin la deriva, un ruido periódico
+  // como el colectivo queda quieto.
+  const delta = periodo > 0 ? ((tt / 1000) * DERIVA * NW) % periodo : 0;
+  const desde = tot - NW - Math.floor(delta);
+  const tope = Math.round(0.08 * SR);
+  const cruces = [];
+  for (let k = desde; k > desde - tope && cruces.length < 2; k--) {
+    if (ring.lp[(k - 1) % RING] < 0 && ring.lp[k % RING] >= 0) cruces.push(k);
+  }
   let ini = tot - NW;
-  const tope = Math.round(0.035 * SR);
-  for (let k = ini; k > ini - tope; k--) {
-    if (ring.lp[(k - 1) % RING] < 0 && ring.lp[k % RING] >= 0) { ini = k; break; }
+  if (cruces.length) ini = cruces[0] + Math.floor(delta);
+  if (cruces.length === 2) {
+    const p = cruces[0] - cruces[1];
+    if (p > 0.003 * SR) periodo = Math.abs(p - periodo) > 0.1 * periodo ? p : periodo + 0.1 * (p - periodo);
   }
   for (let i = 0; i < NW; i++) {
     const k = (ini + i) % RING;
@@ -155,6 +171,45 @@ function toggleCancel() {
     clearTimeout(timerAnc);
     timerAnc = setTimeout(() => { if (s.on) setAnc(true); }, RETARDO_ANC);
   }
+}
+// Tocar el título: volver al principio, sin nada sonando (como al abrir la página).
+function volverAlInicio() {
+  const n = now();
+  clearTimeout(timerSq);
+  apretando = false;
+  Object.assign(s, { noise: null, prevNoise: null, drawAt: null, on: false, offAt: n, sqAt: null, relAt: 0, relSq: 0,
+    mic: 'none', phones: false, help: false });
+  if (s.loose) Object.assign(s, { loose: false, looseAt: n });
+  setAnc(false);
+}
+function nextTheme() {
+  s.theme = ((s.theme || 0) + 1) % TEMAS;
+  el.lienzo.className = 'tema t' + s.theme;
+  document.body.style.background = getComputedStyle(el.lienzo).getPropertyValue('--papel');
+}
+// 05 sample: un archivo de audio propio, en loop, que entra al lazo como cualquier otro ruido.
+async function onFile(e) {
+  const f = e.target && e.target.files && e.target.files[0];
+  if (!f) return;
+  try { e.target.value = ''; } catch (er) { /* nada */ }
+  await ensureAudio();
+  if (!ac || !nodo) return;
+  try {
+    const buf = await ac.decodeAudioData(await f.arrayBuffer());
+    const mono = new Float32Array(buf.length);
+    for (let ch = 0; ch < buf.numberOfChannels; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < d.length; i++) mono[i] += d[i] / buf.numberOfChannels;
+    }
+    nodo.port.postMessage({ sample: mono }, [mono.buffer]);
+    sampleCargado = true;
+    pick('sample');
+  } catch (er) {
+    console.error('No se pudo leer el archivo de audio', er);
+  }
+}
+function sampleClick(e) {
+  if (sampleCargado && s.noise !== 'sample') { e.preventDefault(); pick('sample'); }
 }
 function toggleLoose() { Object.assign(s, { loose: !s.loose, looseAt: now() }); sincronizar(); }
 function squeezeStart(delay) {
@@ -250,7 +305,7 @@ const el = {};
 
 function dibujar(tt, dt) {
   const visible = !!s.noise && (!s.mic || s.mic === 'none' || s.mic === 'ok');
-  if (visible) instantanea();
+  if (visible) instantanea(tt);
 
   // cancelar
   const on = !!s.on, onAt = s.onAt, offAt = s.offAt;
@@ -267,11 +322,12 @@ function dibujar(tt, dt) {
 
   // escala de dibujo
   const fuente = s.mic === 'ok' ? 'mic' : FUENTE[s.noise];
-  if (fuente === 'mic' && disp.listo) {
+  const auto = fuente === 'mic' || fuente === 'sample';
+  if (auto && disp.listo) {
     let q = 0; for (let i = 0; i < NW; i += 4) q += disp.d[i] * disp.d[i];
     micRms += 0.05 * (Math.sqrt(q / (NW / 4)) - micRms);
   }
-  const escObj = fuente === 'mic' ? A / (2.5 * Math.max(micRms, 0.02)) : (ESCALA[fuente] || esc);
+  const escObj = auto ? A / (2.5 * Math.max(micRms, 0.02)) : (ESCALA[fuente] || esc);
   esc += 0.15 * (escObj - esc);
 
   // trazos
@@ -380,6 +436,10 @@ function dibujar(tt, dt) {
     bt.querySelector('.icono').style.visibility = sel ? 'visible' : 'hidden';
   });
 
+  const sOn = s.noise === 'sample';
+  el.sample.style.fontWeight = sOn ? 600 : 400;
+  el.sample.querySelector('.icono').style.visibility = sOn ? 'visible' : 'hidden';
+
   const hA = cl((tt - s.helpAt) / 350);
   el.ayudaCapa.hidden = !s.help;
   el.ayuda.style.opacity = hA.toFixed(2);
@@ -399,7 +459,7 @@ function ajustar() {
 
 function iniciar() {
   for (const id of ['lienzo', 'region', 'out', 'ghost', 'anti', 'resid', 'line', 'pulso1', 'pulso2', 'frase', 'numero', 'numVal',
-    'cancelar', 'cCirc', 'cDot', 'pedir', 'bloqueado', 'auris', 'ayudaCapa', 'ayuda']) el[id] = $(id);
+    'cancelar', 'cCirc', 'cDot', 'pedir', 'bloqueado', 'auris', 'ayudaCapa', 'ayuda', 'sample']) el[id] = $(id);
   el.items = Array.from(document.querySelectorAll('.item'));
   el.items.forEach((bt) => bt.addEventListener('click', () => pick(NOMBRES[+bt.dataset.i])));
   el.cancelar.addEventListener('click', toggleCancel);
@@ -414,6 +474,12 @@ function iniciar() {
   $('micBtn').addEventListener('click', () => { ensureAudio(); pedirMic(); });
   $('aurisSi').addEventListener('click', () => phones(true));
   $('aurisNo').addEventListener('click', () => phones(false));
+  el.sample.addEventListener('click', sampleClick);
+  $('archivo').addEventListener('change', onFile);
+  $('temaBtn').addEventListener('click', nextTheme);
+  const titulo = $('titulo');
+  titulo.addEventListener('click', volverAlInicio);
+  titulo.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); volverAlInicio(); } });
   $('ayudaBtn').addEventListener('click', () => Object.assign(s, { help: true, helpAt: now() }));
   $('ayudaFondo').addEventListener('click', () => { s.help = false; });
   document.addEventListener('keydown', keyDown);

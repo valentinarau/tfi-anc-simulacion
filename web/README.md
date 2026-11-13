@@ -12,6 +12,9 @@ Lo que se oye, las ondas y los dB salen de **la misma simulación que `simulacio
 | Gesto | Tecla | Qué pasa en el modelo |
 |---|---|---|
 | Tocar un ruido | 1 tránsito, 2 bocina, 3 colectivo, 4 micrófono | Cambia la perturbación d (afuera, en oliva, siempre sin modificar) |
+| Tocar **05 sample** | — | Elegir un archivo de audio propio: suena en loop como ruido de afuera (llevado al valor eficaz del tránsito, 0,36 Pa) y el lazo lo cancela |
+| Tocar el título | — | Volver al principio: sin ruido, sin cancelar, auricular puesto |
+| Tocar **[tema]** | — | Pasa por las 6 paletas del prototipo (t0 es la elegida) |
 | Tocar **cancelar** | espacio | Enciende o apaga la rama de realimentación (u = Kp·e) |
 | Tocar la línea | F | Afloja o aprieta el auricular: mal calce (K = 0,6; τ = 0,5 ms) o buen calce (K = 1; τ = 1 ms) |
 | Mantener apretada la línea | mantener G | Kp sube desde 300 (73,5 por segundo); al soltar vuelve a 300. Silba cuando pasa el límite: ~447 flojo, ~528 puesto |
@@ -30,7 +33,7 @@ micrófono y se acopla. La app pregunta antes y, si no hay auriculares, muestra 
 | Archivo | Qué es |
 |---|---|
 | `index.html` | La página (lienzo de 1920 × 1080 que se escala a la pantalla) |
-| `estilo.css` | Paleta t0, textura de papel |
+| `estilo.css` | Paletas t0 a t5, textura de papel |
 | `app.js` | Interfaz: estados, teclado, gestos y dibujo de las ondas con los datos de la simulación |
 | `procesador.js` | AudioWorklet: corre el lazo a la frecuencia del audio y le manda las señales a la interfaz |
 | `motor.js` | El lazo (traducción de `LazoANC.paso`), los ruidos y la clase `Demo` |
@@ -83,7 +86,11 @@ pago (GitHub Pro, Team o Enterprise); con el plan gratuito, el repositorio tiene
 - **Permiso del micrófono:** el prototipo dibuja un cartel que imita al del navegador. En la app
   aparece el cartel real del navegador (no se puede imitar uno que dé permiso de verdad), así que el
   cartel dibujado no está. El resto del flujo (dibujo del micrófono, bloqueado, auriculares) es el mismo.
-- **Sin "05 sample" ni "[tema]":** eran las pruebas de las teclas 5 y T. Queda solo la paleta t0.
+- **Sin teclas 5 y T:** el sample y el tema están, pero solo con el mouse (las teclas eran de prueba).
+- **Título:** tocarlo vuelve al principio (no estaba en el prototipo).
+- **Ondas:** se dibujan como un osciloscopio (cada cuadro arranca en un cruce por cero del ruido) y la
+  ventana se corre despacio, ~0,12 ventanas por segundo, como en el prototipo; así un ruido periódico
+  como el colectivo no queda quieto.
 - **Textura de papel:** generada con `feTurbulence` (la imagen del prototipo no está disponible).
 - **Tiempos de "cancelar":** la animación es la del prototipo. El lazo se enciende cuando el pulso llega
   a la línea (0,3 s) y se apaga en el momento. Mientras el carbón "se achica" (0,8 s), la onda dibujada
