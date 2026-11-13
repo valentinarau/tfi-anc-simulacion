@@ -75,3 +75,8 @@ fórmula de rpm, especificación BLE, gateway, firmware). Ajustado a lo que da l
 sin respuesta en frecuencia (|1 + GH(jω)| reemplazado), sin coeficiente de amortiguamiento ni frecuencia natural
 (la materia ve solo primer orden), Tabla 5 con el vocabulario de los apuntes (PI agrega polo en el origen,
 PD agrega un cero). Epígrafe de la Figura 9 define OT e IT.
+
+Actualización (13/11/2026): diseño de la app web demo ("borrar el ruido") copiado en `web/referencia/`
+(prototipo navegable y pantallas de la herramienta de diseño, no ejecutables fuera de ella; ver su README).
+Próximo paso: Claude Code construye la app en `web/` (lazo de LazoANC.paso en JavaScript con AudioWorklet,
+verificación contra Python, GitHub Pages).
