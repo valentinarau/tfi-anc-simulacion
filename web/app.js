@@ -32,7 +32,15 @@ const KP_NOMINAL = 300, KP_FLOJO = 447;   // la línea se tensa del todo cuando 
 // El lazo simulado silba apenas pasándolos: ~452 flojo y ~533 puesto (ver web/README.md).
 const KP_PUESTO = 528;
 const limite = () => (s.loose ? KP_FLOJO : KP_PUESTO);
-let kpSoltar = KP_NOMINAL;               // Kp al soltar: el indicador lo muestra mientras se desvanece
+// La ganancia queda fija al soltar. Tocar G (sin mantener) o tocar la barrita la vuelve a 300;
+// arrastrar sobre la barrita la sube o la baja.
+let kpFijadoAt = -1e9;                  // cuándo se fijó Kp desde la interfaz (ignora valores viejos del motor)
+let gDownAt = 0, gOpDisp = 0, sqDisp = 0;
+function fijarKp(v) {
+  const kp = Math.round(Math.max(KP_NOMINAL, Math.min(650, v)));
+  est.Kp = kp; kpFijadoAt = now();
+  if (nodo) nodo.port.postMessage({ kp });
+}
 const RETARDO_ANC = 300;                  // [ms] el pulso llega de la oreja a la línea y el lazo arranca
 // Escala de dibujo [px/Pa]: el ruido de cada fuente ocupa lo mismo que en el prototipo.
 // Micrófono y sample: escala automática, pero nunca más grande que la de un ruido de 0,1 Pa eficaces
@@ -71,7 +79,7 @@ function ensureAudio() {
   try { ac = new AC({ sampleRate: 48000, latencyHint: 'interactive' }); } catch (e) { ac = new AC(); }
   SR = ac.sampleRate; NW = Math.round(VENTANA * SR); RING = Math.round(0.4 * SR);
   ring = { d: new Float32Array(RING), cOff: new Float32Array(RING), c: new Float32Array(RING), lp: new Float32Array(RING) };
-  cargando = ac.audioWorklet.addModule('procesador.js?v=2').then(() => {
+  cargando = ac.audioWorklet.addModule('procesador.js?v=3').then(() => {
     nodo = new AudioWorkletNode(ac, 'anc', { numberOfInputs: 1, numberOfOutputs: 1, outputChannelCount: [2] });
     nodo.connect(ac.destination);
     nodo.port.onmessage = (e) => recibir(e.data);
@@ -107,7 +115,8 @@ function recibir(m) {
   // Silba: el parlante satura o el lazo amplifica en lugar de atenuar (lo decide el modelo).
   const satFrac = m.sat / Math.max(1, m.pasos);
   est.wRaw = satFrac > 0.01 || (m.anc && sOn > 4 * sOff && sOn / n > 1e-4) ? 1 : 0;
-  est.env = m.env; est.Kp = m.Kp; est.anc = m.anc;
+  est.env = m.env; est.anc = m.anc;
+  if (now() - kpFijadoAt > 150) est.Kp = m.Kp;   // recién fijado desde la interfaz: puede venir un valor viejo
 }
 
 // Últimos VENTANA segundos, empezando en un cruce por cero del ruido (como un osciloscopio).
@@ -209,6 +218,7 @@ function volverAlInicio() {
   const n = now();
   clearTimeout(timerSq);
   apretando = false;
+  fijarKp(KP_NOMINAL);
   Object.assign(s, { noise: null, prevNoise: null, drawAt: null, on: false, offAt: n, sqAt: null, relAt: 0, relSq: 0,
     mic: 'none', phones: false, help: false });
   if (s.loose) Object.assign(s, { loose: false, looseAt: n });
@@ -265,7 +275,6 @@ function squeezeEnd() {
   if (!s.sqAt) return;
   clearTimeout(timerSq);
   const sq = n >= s.sqAt ? tension() : 0;
-  kpSoltar = n >= s.sqAt ? est.Kp : KP_NOMINAL;
   Object.assign(s, { sqAt: null, relAt: n, relSq: sq });
   apretando = false;
   sincronizar();
@@ -318,7 +327,7 @@ async function pedirMic() {
 function keyDown(e) {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   const k = e.key;
-  if (k === 'g' || k === 'G') { e.preventDefault(); if (!e.repeat) { ensureAudio(); squeezeStart(0); } return; }
+  if (k === 'g' || k === 'G') { e.preventDefault(); if (!e.repeat) { ensureAudio(); gDownAt = now(); squeezeStart(0); } return; }
   if (k === ' ' || k === 'Spacebar') { e.preventDefault(); if (!e.repeat) toggleCancel(); return; }
   if (e.repeat) return;
   if (k === '1') pick('tránsito');
@@ -335,7 +344,10 @@ function keyDown(e) {
 }
 function keyUp(e) {
   const k = e.key;
-  if (k === 'g' || k === 'G') squeezeEnd();
+  if (k === 'g' || k === 'G') {
+    squeezeEnd();
+    if (now() - gDownAt < 250) fijarKp(KP_NOMINAL);   // tocar G sin mantener: vuelve a 300
+  }
   if (k === ' ' || k === 'Spacebar') e.preventDefault();
 }
 
@@ -360,7 +372,9 @@ function dibujar(tt, dt) {
   const lg = s.loose ? ease((tt - s.looseAt) / 600) : 1 - ease((tt - s.looseAt) / 400);
   // apretar: la tensión sigue a Kp; el silbido lo decide el modelo
   const sqOn = s.sqAt != null && tt >= s.sqAt;
-  const sq = sqOn ? tension() : (s.relAt ? (s.relSq || 0) * (1 - ease((tt - s.relAt) / 400)) : 0);
+  // Kp queda fijo al soltar, así que la línea sigue tensa mientras la ganancia no vuelva a 300.
+  sqDisp += (tension() - sqDisp) * Math.min(1, dt / 120);
+  const sq = sqDisp;
   wl = est.wRaw && visible ? Math.min(1, wl + dt / 700) : Math.max(0, wl - dt / 1000);
   const w = wl * wl * (3 - 2 * wl);
 
@@ -488,10 +502,14 @@ function dibujar(tt, dt) {
   el.sample.querySelector('.icono').style.visibility = sOn ? 'visible' : 'hidden';
 
   // Indicador "ganancia 300 → N": mientras se aprieta la línea; al soltar se desvanece en 0,3 s.
-  const gOp = sqOn ? 1 : (s.relAt ? 1 - cl((tt - s.relAt) / 300) : 0);
+  // Queda a la vista mientras se aprieta o mientras la ganancia no sea 300; aparece y se va en 0,3 s.
+  const gVer = sqOn || est.Kp > KP_NOMINAL + 0.5;
+  gOpDisp = gVer ? Math.min(1, gOpDisp + dt / 300) : Math.max(0, gOpDisp - dt / 300);
+  const gOp = gOpDisp;
   el.ganancia.hidden = gOp <= 0.01;
+  el.ganancia.style.pointerEvents = gVer ? 'auto' : 'none';
   if (gOp > 0.01) {
-    const kp = sqOn ? est.Kp : kpSoltar, lim = limite();
+    const kp = est.Kp, lim = limite();
     el.ganancia.style.opacity = gOp.toFixed(2);
     el.ganancia.style.color = kp > lim ? 'var(--ladrillo)' : 'var(--carbon)';
     el.gKp.textContent = Math.round(kp);
@@ -560,6 +578,23 @@ function iniciar() {
   titulo.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); volverAlInicio(); } });
   $('ayudaBtn').addEventListener('click', () => Object.assign(s, { help: true, helpAt: now() }));
   $('ayudaFondo').addEventListener('click', () => { s.help = false; });
+  // Barrita de la ganancia: tocarla vuelve a 300; arrastrar sobre ella la sube o la baja.
+  const gBarra = el.ganancia.querySelector('svg');
+  let gArr = null;
+  const kpEn = (x) => { const r = gBarra.getBoundingClientRect(); return KP_NOMINAL + 400 * (x - r.left) / (r.width || 1); };
+  el.ganancia.addEventListener('pointerdown', (e) => {
+    e.preventDefault();
+    gArr = { x: e.clientX, mueve: false };
+    try { el.ganancia.setPointerCapture(e.pointerId); } catch (er) { /* nada */ }
+  });
+  el.ganancia.addEventListener('pointermove', (e) => {
+    if (!gArr) return;
+    if (!gArr.mueve && Math.abs(e.clientX - gArr.x) > 6) gArr.mueve = true;
+    if (gArr.mueve) fijarKp(kpEn(e.clientX));
+  });
+  const gFin = () => { if (gArr && !gArr.mueve) fijarKp(KP_NOMINAL); gArr = null; };
+  el.ganancia.addEventListener('pointerup', gFin);
+  el.ganancia.addEventListener('pointercancel', () => { gArr = null; });
   document.addEventListener('keydown', keyDown);
   document.addEventListener('keyup', keyUp);
   window.addEventListener('resize', ajustar);

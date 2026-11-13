@@ -89,3 +89,5 @@ html, body { touch-action: manipulation; -webkit-tap-highlight-color: transparen
 .vertical #ganancia { left: 60px !important; top: 560px !important; transform: scale(1.8); transform-origin: 0 0; }
 .vertical #infoLink { font-size: 34px !important; }
 #infoLink:hover { color: var(--carbon) !important; }
+/* La barrita de la ganancia funciona como un control deslizante: zona de toque más grande que el dibujo. */
+#ganancia { padding: 18px; margin: -18px; cursor: ew-resize; touch-action: none; -webkit-user-select: none; user-select: none; }

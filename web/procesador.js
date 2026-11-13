@@ -2,7 +2,7 @@
 // con ~21 pasos de 1 µs por muestra. La salida de audio es c, la presión en el oído.
 // Cada ~21 ms le manda a la interfaz las señales (d, c sin ANC, c) para dibujar las ondas.
 
-import { Demo } from './motor.js?v=2';   // ?v=N: que el navegador no use una versión vieja en caché
+import { Demo } from './motor.js?v=3';   // ?v=N: que el navegador no use una versión vieja en caché
 
 const BLOQUE = 1024;
 

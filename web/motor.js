@@ -249,7 +249,8 @@ export class Demo {
     return f ? f.paso(v) : v;
   }
 
-  // Mensajes de la interfaz: { fuente, anc, calce, apretar, sonido, sample }
+  // Mensajes de la interfaz: { fuente, anc, calce, apretar, kp, sonido, sample }
+  // apretar: Kp sube mientras dura; al soltar queda fijo donde llegó. kp: fija Kp (300 = de fábrica).
   mensaje(m) {
     if (m.sample) {
       // Audio de un archivo (a la frecuencia del audio). Se lleva al valor eficaz del tránsito.
@@ -264,7 +265,8 @@ export class Demo {
     }
     if ('anc' in m) this.lazo.anc = !!m.anc;
     if ('calce' in m) this.lazo.setCalce(m.calce);
-    if ('apretar' in m) { this.apretando = !!m.apretar; if (!this.apretando) this.lazo.Kp = KP_NOMINAL; }
+    if ('apretar' in m) this.apretando = !!m.apretar;
+    if ('kp' in m) this.lazo.Kp = Math.max(KP_NOMINAL, Math.min(KP_TOPE, +m.kp || KP_NOMINAL));
     if ('sonido' in m) this.sonido = !!m.sonido;
   }
 

@@ -116,3 +116,7 @@ Actualización (13/11/2026, 8): página de información construida en `web/info.
 `web/img/`), según `web/referencia/INFO.md`; usa la paleta que la app guarda al tocar [tema]. En la app: indicador
 "ganancia 300 → N" con marca de límite (447 flojo / 528 puesto, los de la fórmula) y "[info] →" en el "?". La tensión
 de la línea ahora llega al máximo en el límite del calce actual. Falta confirmar origen y licencia de las 8 fotos.
+
+Actualización (13/11/2026, 9): en la app la ganancia queda fija al soltar la línea (antes volvía a 300). La barrita del
+indicador funciona como slider (arrastrar sube o baja Kp, 300 a 650); tocarla o tocar G sin mantener vuelve a 300.
+`motor.js` acepta el mensaje `{ kp }`. La página de información no se tocó.

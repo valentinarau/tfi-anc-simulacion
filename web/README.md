@@ -18,7 +18,9 @@ Lo que se oye, las ondas y los dB salen de **la misma simulación que `simulacio
 | Tocar **[tema]** | — | Pasa por las 6 paletas del prototipo (t0 es la elegida) |
 | Tocar **cancelar** | espacio | Enciende o apaga la rama de realimentación (u = Kp·e) |
 | Tocar la línea | F | Afloja o aprieta el auricular: mal calce (K = 0,6; τ = 0,5 ms) o buen calce (K = 1; τ = 1 ms) |
-| Mantener apretada la línea | mantener G | Kp sube desde 300 (73,5 por segundo); al soltar vuelve a 300. Silba cuando pasa el límite: ~447 flojo, ~528 puesto. Al lado de la línea aparece "ganancia 300 → N" con una barrita, un punto en N y una marca en el límite; se pone ladrillo al pasarlo |
+| Mantener apretada la línea | mantener G | Kp sube desde 300 (73,5 por segundo); al soltar queda fijo donde llegó. Silba cuando pasa el límite: ~447 flojo, ~528 puesto. Al lado de la línea aparece "ganancia 300 → N" con una barrita, un punto en N y una marca en el límite; se pone ladrillo al pasarlo |
+| Arrastrar sobre la barrita de la ganancia | — | Funciona como un slider: sube o baja Kp (de 300 a 650) y queda fijo |
+| Tocar la barrita de la ganancia | tocar G (sin mantener) | Kp vuelve a 300, el valor de fábrica. Tocar el título también |
 | ? | ? | Qué estoy viendo. Esc cierra. El enlace **[info] →** lleva a la página de información |
 
 Adentro del auricular se dibujan: en oliva fino, el ruido que entra por la vía pasiva (c sin ANC); en rosa
@@ -155,6 +157,9 @@ pago (GitHub Pro, Team o Enterprise); con el plan gratuito, el repositorio tiene
 - **Indicador de ganancia y tensión de la línea:** como en el prototipo final, la línea se tensa del todo al llegar al
   límite del calce actual (447 flojo, 528 puesto); antes se tensaba siempre hasta 447. El indicador va junto a la línea
   (la posición por defecto del prototipo); en el celular parado, más grande y debajo de la frase.
+- **La ganancia queda fija:** en el prototipo, al soltar la línea Kp volvía a 300. En la app queda donde llegó, se ajusta
+  arrastrando sobre la barrita del indicador y vuelve a 300 tocando la barrita o tocando G. El indicador queda a la vista
+  mientras Kp no sea 300. (El auricular real no deja cambiarla: viene fija de fábrica.)
 - **Almohadilla pasiva:** con micrófono y sample, el sonido que entra al lazo pasa antes por un pasabajos
   de 1 kHz (ver "Micrófono y sample" arriba). El prototipo no lo tenía.
 - **Bocina:** tránsito a la mitad y una bocina de 1 s cada 3 s (420 Hz y armónicos, subida de 5 ms como
