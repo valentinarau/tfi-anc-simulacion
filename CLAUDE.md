@@ -97,3 +97,7 @@ Las ondas derivan despacio (~0,12 ventanas/s) para que el colectivo no quede qui
 
 Actualización (13/11/2026, 4): el repo pasó a ser público y Pages quedó activado (Source: GitHub Actions).
 La demo está en https://valentinarau.github.io/tfi-anc-simulacion/ y se vuelve a publicar en cada push a `main` que toque `web/`.
+
+Actualización (13/11/2026, 5): app web apta para celular (lienzo vertical 1080 × 1920 cuando la pantalla está parada),
+sin raya en los bordes (textura, oliva y línea siguen fuera del lienzo), y textura de papel original (`web/grano.png`,
+copiada de `web/referencia/grano.png`). Los enlaces llevan `?v=N` para que el navegador no use versiones viejas en caché.

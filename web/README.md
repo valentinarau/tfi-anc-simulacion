@@ -12,6 +12,7 @@ Lo que se oye, las ondas y los dB salen de **la misma simulación que `simulacio
 | Gesto | Tecla | Qué pasa en el modelo |
 |---|---|---|
 | Tocar un ruido | 1 tránsito, 2 bocina, 3 colectivo, 4 micrófono | Cambia la perturbación d (afuera, en oliva, siempre sin modificar) |
+| Tocar el ruido que ya suena | la misma tecla | Lo apaga: silencio, sin cancelar |
 | Tocar **05 sample** | — | Elegir un archivo de audio propio: suena en loop como ruido de afuera (llevado al valor eficaz del tránsito, 0,36 Pa) y el lazo lo cancela |
 | Tocar el título | — | Volver al principio: sin ruido, sin cancelar, auricular puesto |
 | Tocar **[tema]** | — | Pasa por las 6 paletas del prototipo (t0 es la elegida) |
@@ -33,7 +34,8 @@ micrófono y se acopla. La app pregunta antes y, si no hay auriculares, muestra 
 | Archivo | Qué es |
 |---|---|
 | `index.html` | La página (lienzo de 1920 × 1080 que se escala a la pantalla) |
-| `estilo.css` | Paletas t0 a t5, textura de papel |
+| `estilo.css` | Paletas t0 a t5, textura de papel, disposición vertical para celular |
+| `grano.png` | Textura de papel del prototipo |
 | `app.js` | Interfaz: estados, teclado, gestos y dibujo de las ondas con los datos de la simulación |
 | `procesador.js` | AudioWorklet: corre el lazo a la frecuencia del audio y le manda las señales a la interfaz |
 | `motor.js` | El lazo (traducción de `LazoANC.paso`), los ruidos y la clase `Demo` |
@@ -78,7 +80,7 @@ Para activarlo (una sola vez):
 
 **Ojo: la página queda pública aunque el repositorio sea privado.** Cualquiera con la dirección la puede
 ver. Solo se publican los archivos de la app (`index.html`, `app.js`, `motor.js`, `procesador.js`,
-`estilo.css`); el resto del repo no. Además, GitHub Pages en un repositorio privado necesita un plan
+`estilo.css`, `grano.png`); el resto del repo no. Además, GitHub Pages en un repositorio privado necesita un plan
 pago (GitHub Pro, Team o Enterprise); con el plan gratuito, el repositorio tiene que ser público.
 
 ## Diferencias con el prototipo de diseño
@@ -91,7 +93,12 @@ pago (GitHub Pro, Team o Enterprise); con el plan gratuito, el repositorio tiene
 - **Ondas:** se dibujan como un osciloscopio (cada cuadro arranca en un cruce por cero del ruido) y la
   ventana se corre despacio, ~0,12 ventanas por segundo, como en el prototipo; así un ruido periódico
   como el colectivo no queda quieto.
-- **Textura de papel:** generada con `feTurbulence` (la imagen del prototipo no está disponible).
+- **Textura de papel:** `grano.png`, la imagen original del prototipo (copiada de `referencia/`), usada igual: 320 px, repetida, opacidad 0,55.
+- **Celular parado:** el prototipo es solo horizontal (1920 × 1080). Con la pantalla vertical la app usa un lienzo de
+  1080 × 1920 con la misma idea (adentro a la izquierda, afuera a la derecha, la línea en el medio): título en dos
+  líneas arriba, ondas en el medio, número y ruidos abajo, cancelar sobre la línea y letra más grande.
+- **Bordes:** la textura, el oliva y la línea siguen más allá del lienzo, así el margen que sobra cuando la pantalla
+  tiene otra proporción no se nota.
 - **Tiempos de "cancelar":** la animación es la del prototipo. El lazo se enciende cuando el pulso llega
   a la línea (0,3 s) y se apaga en el momento. Mientras el carbón "se achica" (0,8 s), la onda dibujada
   pasa de c sin ANC a c; el sonido ya es el del lazo.

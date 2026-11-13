@@ -10,7 +10,15 @@
 //                   y c (carbón: lo que oís)
 
 const $ = (id) => document.getElementById(id);
-const TAU = Math.PI * 2, YC = 540, R0 = 170, R1 = 925, N0 = 1000, N1 = 1580, LX = 960, A = 120;
+const TAU = Math.PI * 2, A = 120;
+// Geometría del lienzo. Horizontal: la del prototipo (1920 × 1080). Vertical (celular parado): 1080 × 1920,
+// misma idea (adentro a la izquierda, afuera a la derecha, la línea en el medio) con otra distribución.
+const DISENO = {
+  horizontal: { W: 1920, H: 1080, LX: 960, YC: 540, YG: 510, R0: 170, R1: 925, N0: 1000, N1: 1580, golpe: [0, 730] },
+  vertical: { W: 1080, H: 1920, LX: 540, YC: 860, YG: 830, R0: 150, R1: 505, N0: 578, N1: 1010, golpe: [450, 1050] },
+};
+let G = DISENO.horizontal;
+let { LX, YC, YG, R0, R1, N0, N1 } = G;
 const cl = (x) => (x < 0 ? 0 : x > 1 ? 1 : x);
 const ease = (x) => { x = cl(x); return 1 - Math.pow(1 - x, 3); };
 const jit = (x) => 1.4 * (Math.sin(x * 0.031 + 1) + 0.6 * Math.sin(x * 0.017 + 2) + 0.4 * Math.sin(x * 0.073)) / 2;
@@ -141,9 +149,23 @@ const valor = (arr, u) => {
 };
 
 // ---------------------------------------------------------------- acciones (las del prototipo)
+// Apagar el ruido: silencio, sin cancelar (el auricular queda flojo o puesto, como estaba).
+function apagar() {
+  const n = now();
+  clearTimeout(timerSq);
+  apretando = false;
+  Object.assign(s, { noise: null, prevNoise: null, drawAt: null, on: false, offAt: n, sqAt: null,
+    mic: 'none', phones: false, help: false });
+  setAnc(false);
+}
+function seleccionado(name) {
+  return name === 'micrófono' ? (s.mic && s.mic !== 'none') : s.noise === name;
+}
 function pick(name) {
   ensureAudio();
   const n = now();
+  // Tocar el ruido que ya está elegido lo apaga (1 a 4 funcionan como interruptor).
+  if (name !== 'sample' && seleccionado(name)) { apagar(); return; }
   if (name === 'micrófono') {
     Object.assign(s, { mic: 'ask', noise: null, prevNoise: null, on: false, offAt: -1e9, drawAt: null, help: false });
     setAnc(false);
@@ -184,8 +206,7 @@ function volverAlInicio() {
 }
 function nextTheme() {
   s.theme = ((s.theme || 0) + 1) % TEMAS;
-  el.lienzo.className = 'tema t' + s.theme;
-  document.body.style.background = getComputedStyle(el.lienzo).getPropertyValue('--papel');
+  el.escena.className = 'tema t' + s.theme;
 }
 // 05 sample: un archivo de audio propio, en loop, que entra al lazo como cualquier otro ruido.
 async function onFile(e) {
@@ -244,10 +265,10 @@ let hv = {}, hcur = 0;
 function hoverMove(e) {
   const r = e.currentTarget.getBoundingClientRect();
   const lxl = (e.clientX - r.left) * (90 / (r.width || 90));
-  const ly = (e.clientY - r.top) * (730 / (r.height || 730));
+  const ly = G.golpe[0] + (e.clientY - r.top) * (G.golpe[1] / (r.height || G.golpe[1]));
   hv = { active: true, y: ly, dx: Math.max(-13, Math.min(13, (lxl - 45) * 0.32)) };
 }
-function hoverOut() { hv = { active: false, y: hv.y || 365, leaveAt: now(), leaveDx: hcur || hv.dx || 0 }; }
+function hoverOut() { hv = { active: false, y: hv.y || YG - 145, leaveAt: now(), leaveDx: hcur || hv.dx || 0 }; }
 
 function phones(yes) {
   const n = now();
@@ -355,21 +376,24 @@ function dibujar(tt, dt) {
   // la línea
   if (hv.active) hcur += (hv.dx - hcur) * 0.3; else hcur = 0;
   const hAmp = hv.active ? hcur : (hv.leaveAt ? hv.leaveDx * Math.exp(-(tt - hv.leaveAt) / 260) * Math.cos(TAU * (tt - hv.leaveAt) / 170) : 0);
-  const hy = hv.y || 365;
+  const hy = hv.y || YG - 145;
   const hvf = (y) => (Math.abs(hAmp) < 0.05 ? 0 : hAmp * Math.exp(-Math.pow((y - hy) / 110, 2)));
-  const lx = (y) => LX + hvf(y) + 2 * jit(y * 1.7) - 80 * lg * Math.exp(-Math.pow((y - 510) / 95, 2))
+  const lx = (y) => LX + hvf(y) + 2 * jit(y * 1.7) - 80 * lg * Math.exp(-Math.pow((y - YG) / 95, 2))
     + (1.5 + 4.5 * sq) * sq * Math.sin(y / 4.5 + tt * 0.09) + 9 * w * Math.sin(TAU * y / 15 + tt * 0.05);
   const step = (w > 0.02 || sq > 0.02) ? 5 : 12;
   let line = '', region = '', first = true;
   const gap = 78 * lg;
-  for (let y = -10; y <= 1092; y += step) {
+  // La línea y el oliva siguen más allá del lienzo de 1920 × 1080, así el margen que sobra cuando la
+  // ventana tiene otra proporción no se nota.
+  const yFin = G.H + 1210;
+  for (let y = -1200; y <= yFin; y += step) {
     const x = lx(y).toFixed(1);
-    region += (y === -10 ? 'M' : 'L') + x + ' ' + y;
-    const inGap = gap > 4 && y > 510 - gap && y < 510 + gap;
+    region += (y === -1200 ? 'M' : 'L') + x + ' ' + y;
+    const inGap = gap > 4 && y > YG - gap && y < YG + gap;
     if (inGap) { first = true; continue; }
     line += (first ? 'M' : 'L') + x + ' ' + y; first = false;
   }
-  region += 'L1930 1092L1930 -10Z';
+  region += 'L6000 ' + yFin + 'L6000 -1200Z';
 
   // frase
   const golpe = s.noise === 'bocina' && est.env > 0.15;
@@ -453,13 +477,27 @@ function bucle(ts) {
 
 // ---------------------------------------------------------------- escala del lienzo 1920 × 1080
 function ajustar() {
-  const W = window.innerWidth, H = window.innerHeight, k = Math.min(W / 1920, H / 1080);
-  el.lienzo.style.transform = `translate(${((W - 1920 * k) / 2).toFixed(1)}px, ${((H - 1080 * k) / 2).toFixed(1)}px) scale(${k})`;
+  const W = window.innerWidth, H = window.innerHeight;
+  const vertical = H > W;
+  const nuevo = vertical ? DISENO.vertical : DISENO.horizontal;
+  if (nuevo !== G) {
+    G = nuevo; ({ LX, YC, YG, R0, R1, N0, N1 } = G);
+    hv = {};
+  }
+  el.escena.classList.toggle('vertical', vertical);
+  el.lienzo.style.width = G.W + 'px'; el.lienzo.style.height = G.H + 'px';
+  for (const sv of el.lienzo.querySelectorAll(':scope > svg')) {
+    sv.setAttribute('width', G.W); sv.setAttribute('height', G.H); sv.setAttribute('viewBox', `0 0 ${G.W} ${G.H}`);
+  }
+  el.oreja.setAttribute('transform', `translate(0 ${YC - 540})`);
+  el.pulso1.setAttribute('cy', YC); el.pulso2.setAttribute('cy', YC);
+  const k = Math.min(W / G.W, H / G.H);
+  el.lienzo.style.transform = `translate(${((W - G.W * k) / 2).toFixed(1)}px, ${((H - G.H * k) / 2).toFixed(1)}px) scale(${k})`;
 }
 
 function iniciar() {
-  for (const id of ['lienzo', 'region', 'out', 'ghost', 'anti', 'resid', 'line', 'pulso1', 'pulso2', 'frase', 'numero', 'numVal',
-    'cancelar', 'cCirc', 'cDot', 'pedir', 'bloqueado', 'auris', 'ayudaCapa', 'ayuda', 'sample']) el[id] = $(id);
+  for (const id of ['escena', 'lienzo', 'region', 'out', 'ghost', 'anti', 'resid', 'line', 'pulso1', 'pulso2', 'frase', 'numero', 'numVal',
+    'cancelar', 'cCirc', 'cDot', 'oreja', 'pedir', 'bloqueado', 'auris', 'ayudaCapa', 'ayuda', 'sample']) el[id] = $(id);
   el.items = Array.from(document.querySelectorAll('.item'));
   el.items.forEach((bt) => bt.addEventListener('click', () => pick(NOMBRES[+bt.dataset.i])));
   el.cancelar.addEventListener('click', toggleCancel);
@@ -485,6 +523,8 @@ function iniciar() {
   document.addEventListener('keydown', keyDown);
   document.addEventListener('keyup', keyUp);
   window.addEventListener('resize', ajustar);
+  // Navegadores sin overflow: clip: si el foco desplaza la escena, volverla a su lugar.
+  el.escena.addEventListener('scroll', () => { el.escena.scrollLeft = 0; el.escena.scrollTop = 0; });
   ajustar();
   requestAnimationFrame(bucle);
 }

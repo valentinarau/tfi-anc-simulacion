@@ -41,7 +41,7 @@ jobs:
       - name: Armar el sitio (solo los archivos de la app)
         run: |
           mkdir _site
-          cp web/index.html web/app.js web/motor.js web/procesador.js web/estilo.css _site/
+          cp web/index.html web/app.js web/motor.js web/procesador.js web/estilo.css web/grano.png _site/
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
