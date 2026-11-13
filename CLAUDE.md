@@ -80,3 +80,13 @@ Actualización (13/11/2026): diseño de la app web demo ("borrar el ruido") copi
 (prototipo navegable y pantallas de la herramienta de diseño, no ejecutables fuera de ella; ver su README).
 Próximo paso: Claude Code construye la app en `web/` (lazo de LazoANC.paso en JavaScript con AudioWorklet,
 verificación contra Python, GitHub Pages).
+
+Actualización (13/11/2026, 2): app web construida en `web/` (HTML + CSS + JS plano, sin build).
+`motor.js` = traducción de LazoANC.paso (verificada: `node web/test/comparar.js`, caso nuevo
+`evidencia/07_app_web/`, todo dentro de ±0,5 dB y ±1 %); corre en un AudioWorklet (`procesador.js`) a 48 kHz.
+Ruidos con las fórmulas de Python (tránsito 0,36 Pa, colectivo 0,63 Pa, bocina 2 Pa de 1 s cada 3 s sobre
+tránsito a la mitad). Kp sube 73,5/s al mantener la línea (silba ~2,1 s flojo, ~3,2 s puesto).
+El lazo simulado oscila desde Kp 521 / 441 (1,3 % debajo de la fórmula 528 / 447: Euler suma medio paso de retardo).
+Publicación: workflow `.github/workflows/pages.yml` (falta activar Pages → Source: GitHub Actions).
+Diferencias con el prototipo (cartel real del micrófono, sin sample ni tema, etc.) en `web/README.md`.
+Pendiente: probar el micrófono real con auriculares (en el panel de Claude el micrófono está bloqueado).

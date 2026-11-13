@@ -1,0 +1,45 @@
+/* borrar el ruido: paleta t0 del prototipo (web/referencia/Prototipo.dc.html) */
+.t0 {
+  --papel: #F2E3C8;
+  --oliva: #55603A;
+  --carbon: #2B2618;
+  --suave: #6A5E45;
+  --rosa: #C0647A;
+  --ladrillo: #9E3B2C;
+  --relleno: #E8D5B3;
+}
+
+html, body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #F2E3C8;
+}
+
+a { color: #2B2618; }
+a:hover { color: #6A5E45; }
+
+/* El lienzo está diseñado a 1920 × 1080: se escala manteniendo la proporción (app.js). */
+#escena {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+}
+#lienzo {
+  transform-origin: 0 0;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+[hidden] { display: none !important; }
+
+/* Grano de papel: reemplaza la imagen interna de la herramienta de diseño por ruido feTurbulence. */
+.grano {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='320' height='320'><filter id='g'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.17  0 0 0 0 0.15  0 0 0 0 0.09  0 0 0 1.4 -0.72'/></filter><rect width='320' height='320' filter='url(%23g)'/></svg>");
+  background-size: 320px 320px;
+  background-repeat: repeat;
+  opacity: 0.55;
+}
+
+button:focus { outline: none; }
+button:focus-visible { outline: 3px solid var(--rosa); outline-offset: 4px; }

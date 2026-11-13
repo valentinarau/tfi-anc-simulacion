@@ -56,3 +56,9 @@ Si `python` no responde en Windows, usar `py` en su lugar.
   (`Kp ≥ Kp máx exacto`), no a partir de la señal simulada. Ambos coinciden en la práctica.
 - La prealimentación es ideal: usa la misma perturbación `d` y el mismo retardo que el anti-ruido,
   por lo que con un ajuste del 80 % agrega exactamente 20·log(1/0,2) ≈ 14 dB.
+
+## Demo web ("borrar el ruido")
+
+En `web/` está la demo interactiva para el público: el mismo lazo, traducido a JavaScript, corriendo
+en el navegador con sonido. Cómo probarla, cómo se verifica contra este simulador y cómo publicarla
+con GitHub Pages: ver [web/README.md](web/README.md).
