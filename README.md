@@ -3,6 +3,9 @@
 Trabajo Final Integrador de **Tecnologías para la Automatización** (Teoría de Control), curso K4521, UTN FRBA.
 Profesor: Omar Oscar Civale. Integrantes: Thomas Leandro Pereyra y Valentina Luján Rau Robayo.
 
+**Demo en línea:** https://valentinarau.github.io/tfi-anc-simulacion/ (con auriculares; la página de
+información está en https://valentinarau.github.io/tfi-anc-simulacion/info.html).
+
 Simula en tiempo real el lazo de cancelación activa de ruido (ANC) de un auricular tipo AirPods Pro 3:
 control proporcional por umbral sobre una cavidad de primer orden con retardo,
 `Gp(s) = K·e^(−Ts) / (τs + 1)`, con referencia nula (silencio).
@@ -58,6 +61,8 @@ Si `python` no responde en Windows, usar `py` en su lugar.
   por lo que con un ajuste del 80 % agrega exactamente 20·log(1/0,2) ≈ 14 dB.
 
 ## Demo web ("borrar el ruido")
+
+Abrirla: **https://valentinarau.github.io/tfi-anc-simulacion/**
 
 En `web/` está la demo interactiva para el público: el mismo lazo, traducido a JavaScript, corriendo
 en el navegador con sonido. Cómo probarla, cómo se verifica contra este simulador y cómo publicarla
