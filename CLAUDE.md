@@ -94,3 +94,6 @@ Pendiente: probar el micrófono real con auriculares (en el panel de Claude el m
 Actualización (13/11/2026, 3): en la app web volvieron "05 sample" (archivo propio, en loop, al nivel del tránsito)
 y el botón [tema] con las 6 paletas del prototipo (sin las teclas 5 y T). Tocar el título vuelve al inicio.
 Las ondas derivan despacio (~0,12 ventanas/s) para que el colectivo no quede quieto.
+
+Actualización (13/11/2026, 4): el repo pasó a ser público y Pages quedó activado (Source: GitHub Actions).
+La demo está en https://valentinarau.github.io/tfi-anc-simulacion/ y se vuelve a publicar en cada push a `main` que toque `web/`.
