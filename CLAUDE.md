@@ -120,3 +120,6 @@ de la línea ahora llega al máximo en el límite del calce actual. Falta confir
 Actualización (13/11/2026, 9): en la app la ganancia queda fija al soltar la línea (antes volvía a 300). La barrita del
 indicador funciona como slider (arrastrar sube o baja Kp, 300 a 650); tocarla o tocar G sin mantener vuelve a 300.
 `motor.js` acepta el mensaje `{ kp }`. La página de información no se tocó.
+
+Actualización (13/11/2026, 10): Esc en la app primero cierra lo que esté abierto ("?", carteles del micrófono) y, si no hay
+nada, vuelve al inicio igual que tocar el título (paleta y sample cargado quedan).

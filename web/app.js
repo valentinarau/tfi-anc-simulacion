@@ -340,6 +340,7 @@ function keyDown(e) {
     if (s.help) s.help = false;
     else if (s.mic === 'phones') phones(false);
     else if (s.mic === 'ask') s.mic = 'none';
+    else volverAlInicio();   // sin nada abierto: igual que tocar el título (paleta y sample cargado quedan)
   }
 }
 function keyUp(e) {

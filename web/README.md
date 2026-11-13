@@ -14,7 +14,7 @@ Lo que se oye, las ondas y los dB salen de **la misma simulación que `simulacio
 | Tocar un ruido | 1 tránsito, 2 bocina, 3 colectivo, 4 micrófono | Cambia la perturbación d (afuera, en oliva, siempre sin modificar) |
 | Tocar el ruido que ya suena | la misma tecla | Lo apaga: silencio, sin cancelar |
 | Tocar **05 sample** | — | Elegir un archivo de audio propio: suena en loop como ruido de afuera (llevado al valor eficaz del tránsito, 0,36 Pa) y el lazo lo cancela |
-| Tocar el título | — | Volver al principio: sin ruido, sin cancelar, auricular puesto |
+| Tocar el título | Esc (si no hay nada abierto) | Volver al principio: sin ruido, sin cancelar, auricular puesto, ganancia en 300. La paleta y el sample cargado quedan. Si hay algo abierto (el "?" o un cartel del micrófono), Esc primero lo cierra |
 | Tocar **[tema]** | — | Pasa por las 6 paletas del prototipo (t0 es la elegida) |
 | Tocar **cancelar** | espacio | Enciende o apaga la rama de realimentación (u = Kp·e) |
 | Tocar la línea | F | Afloja o aprieta el auricular: mal calce (K = 0,6; τ = 0,5 ms) o buen calce (K = 1; τ = 1 ms) |
