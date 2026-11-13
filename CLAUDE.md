@@ -127,3 +127,7 @@ nada, vuelve al inicio igual que tocar el título (paleta y sample cargado queda
 Actualización (13/11/2026, 11): audios de prueba para "05 sample" en `samples/` (calle, transporte, efectos), con
 origen, licencia y atenuación medida en `samples/README.md`. Las dos grabaciones de Buenos Aires están recortadas a 1 min;
 falta completar su origen.
+
+Actualización (13/11/2026, 12): favicon (`web/favicon.svg` + `web/favicon.js`): gota de tinta rosa con punto color papel,
+como el botón cancelar encendido; cambia con la paleta en la app y en la página de información. En el pie de la página de
+información, [Simulación] pasó a ser [Créditos]: Valentina Rau y Thomas Pereyra.

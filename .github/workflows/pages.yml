@@ -42,7 +42,7 @@ jobs:
         run: |
           mkdir _site
           cp web/index.html web/app.js web/motor.js web/procesador.js web/estilo.css web/grano.png _site/
-          cp web/info.html web/info.css web/info.js _site/
+          cp web/info.html web/info.css web/info.js web/favicon.svg web/favicon.js _site/
           cp -R web/img _site/img
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3

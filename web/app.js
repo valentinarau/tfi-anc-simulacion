@@ -9,6 +9,8 @@
 //   adentro         c sin ANC (oliva fino), c − c sin ANC (rosa: lo que agrega el auricular)
 //                   y c (carbón: lo que oís)
 
+import { aplicarFavicon } from './favicon.js?v=1';
+
 const $ = (id) => document.getElementById(id);
 const TAU = Math.PI * 2, A = 120;
 // Geometría del lienzo. Horizontal: la del prototipo (1920 × 1080). Vertical (celular parado): 1080 × 1920,
@@ -234,6 +236,7 @@ function nextTheme() {
 function aplicarTema() {
   for (let i = 0; i < TEMAS; i++) el.escena.classList.toggle('t' + i, i === s.theme);
   el.escena.classList.add('tema');
+  aplicarFavicon(s.theme);
 }
 function guardarTema() { try { localStorage.setItem('anc-tema', String(s.theme)); } catch (e) { /* sin almacenamiento */ } }
 function leerTema() {

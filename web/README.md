@@ -67,6 +67,7 @@ Para evitarlo, elegir en el navegador el micrófono de la compu y dejar los AirP
 | `index.html` | La página (lienzo de 1920 × 1080 que se escala a la pantalla) |
 | `estilo.css` | Paletas t0 a t5, textura de papel, disposición vertical para celular |
 | `grano.png` | Textura de papel del prototipo |
+| `favicon.svg`, `favicon.js` | Ícono de la pestaña: el botón cancelar encendido con forma de gota de tinta; `favicon.js` lo pinta con la paleta activa |
 | `info.html`, `info.css`, `info.js` | Página de información ("cómo se borra el ruido"), ver abajo |
 | `img/` | Fotos de la página de información |
 | `app.js` | Interfaz: estados, teclado, gestos y dibujo de las ondas con los datos de la simulación |

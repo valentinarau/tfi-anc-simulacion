@@ -1,6 +1,8 @@
 // Página de información: revelado al scrollear, menú, parallax, "el calce" y "el silbido".
 // Lógica traducida de web/referencia/Info.dc.html (especificación en web/referencia/INFO.md).
 
+import { aplicarFavicon } from './favicon.js?v=1';
+
 const $ = (id) => document.getElementById(id);
 const pg = $('pg');
 const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -9,6 +11,7 @@ const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: 
 const FOTO_TEMA = ['vereda', 'sillon', 'rojo', 'blanca', 'bn', 'colgando'];
 const tema = Math.max(0, parseInt((document.documentElement.className.match(/t(\d)/) || [])[1] || '0', 10));
 for (const img of document.querySelectorAll('[data-foto]')) img.hidden = img.dataset.foto !== FOTO_TEMA[tema];
+aplicarFavicon(tema);
 
 // ---------------------------------------------------------------- revelado
 // Cada sección aparece una sola vez cuando se ve el 15 %. GRACIAS entra cada vez que el pie vuelve a verse.
