@@ -131,3 +131,5 @@ falta completar su origen.
 Actualización (13/11/2026, 12): favicon (`web/favicon.svg` + `web/favicon.js`): gota de tinta rosa con punto color papel,
 como el botón cancelar encendido; cambia con la paleta en la app y en la página de información. En el pie de la página de
 información, [Simulación] pasó a ser [Créditos]: Valentina Rau y Thomas Pereyra.
+
+Actualización (14/11/2026): fecha de entrega en la carátula: 28/11/2026. Ecuaciones del informe ya insertadas con el editor de Docs (13); faltan corregir a mano la 3 (θo con letra o y Π en el denominador) y la 10 (+ después de s²).
