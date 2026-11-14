@@ -133,3 +133,10 @@ como el botón cancelar encendido; cambia con la paleta en la app y en la págin
 información, [Simulación] pasó a ser [Créditos]: Valentina Rau y Thomas Pereyra.
 
 Actualización (14/11/2026): fecha de entrega en la carátula: 28/11/2026. Ecuaciones del informe ya insertadas con el editor de Docs (13); faltan corregir a mano la 3 (θo con letra o y Π en el denominador) y la 10 (+ después de s²).
+
+Actualización (14/11/2026, 2): micrófono externo (ME) agregado al diagrama según el boceto del profesor: su señal se suma
+a la del micrófono interno en un punto suma (+ +) antes del comparador. Figuras 2 y 3 nuevas (mismo estilo, compuestas
+sobre las originales) subidas a Drive como TFI_ANC_figura2_bloques.png y TFI_ANC_figura3_bloques_unidades.png; falta
+reemplazarlas a mano en el informe. Textos agregados: sección 4, Tabla 2 (Elemento de medición), 6.4 (dₑ(t), bₑ(t),
+e(t) con ME), Tabla 6 (fila Hₑ(s) = Kme), 8.4 (la rama de ME no cierra lazo: no cambia estabilidad) y 9.5 (paréntesis).
+Kme queda simbólico.
