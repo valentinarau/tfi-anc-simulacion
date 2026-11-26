@@ -60,21 +60,6 @@ Agregar algo acá solo si otra sesión lo necesita para no equivocarse; si una d
 - Carga: "sistema auditivo de una persona adulta con audición sana" ("usuario" es demasiado genérico).
 - No describir las ramas como "en paralelo".
 
-## Al tocar el informe
-
-- Resaltar en amarillo todo lo que se modifique, para que lo revisen. Lo que vuelve a su redacción original va sin resaltar.
-- Las ecuaciones (objetos del editor) y las imágenes no se pueden editar desde la API de Docs: hay que avisar y se cambian a mano.
-- **Bibliografía:** es una lista al final, sin marcas [n] en el texto (es lo que pide la consigna). Todo dato externo que se
-  agregue o cambie (norma, especificación, medición de terceros) tiene que tener su fuente en esa lista; al tocar un dato,
-  revisar que la fuente esté y que diga lo que el informe afirma. En lo posible, nombrar la fuente en la misma frase.
-- **Numeración:** si se agrega o saca una tabla o figura, actualizar todas las citas del informe y también las de
-  `generar_evidencia.py` y los README de `evidencia/`, que citan tablas por número.
-  Tablas: 1 sistemas de referencia, 2 elementos, 3 catálogo del micrófono, 4 contexto y parámetros, 5 señales del lazo,
-  6 leyes de control, 7 transferencias, 8 atenuación por frecuencia, 9 Routh, 10 ventana de sintonía, 11 ruidos urbanos,
-  12 interfaz, 13 síntesis de ensayos. Figuras: 1 corte del auricular, 2 y 3 diagramas en bloques, 4 a 8 ensayos, 9 capas IoT.
-- Los valores numéricos del informe (sección 8 y ensayos) coinciden con el simulador y con `evidencia/`. Si un cambio toca un
-  número, recalcularlo y verificarlo contra los tres.
-
 ## Al tocar el código
 
 - `web/motor.js` es la traducción a JavaScript de `LazoANC.paso` de `simulacion_anc.py`. Si cambia el lazo en uno, revisar
@@ -85,5 +70,7 @@ Agregar algo acá solo si otra sesión lo necesita para no equivocarse; si una d
   difieren el redondeo y la tipografía de las figuras. Para corregir un texto, editar el script y los README a mano.
 - El lazo simulado oscila desde Kp 521 (buen calce) / 441 (mal calce), 1,3 % por debajo de la fórmula (528 / 447), porque
   Euler suma medio paso de retardo. No es un error.
+- `generar_evidencia.py` y los README de `evidencia/` citan tablas y figuras del informe por número: si la numeración del
+  informe cambia, actualizarlos (a mano, sin regenerar).
 - En la app web, la "almohadilla pasiva" (pasabajos de 1 kHz para micrófono y sample) es una suposición de la app, no del informe.
 - `web/referencia/` es el prototipo de diseño: no es ejecutable y no se edita.
