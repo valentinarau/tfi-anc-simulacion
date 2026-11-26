@@ -154,3 +154,12 @@ Resuelto (26/11/2026, 2): el informe volvió al modelo del boceto del profesor. 
 antes del comparador: e(t) = r(t) − [b(t) + bₑ(t)], u(t) = Kp·e(t), y C(s)/De(s) = −Kme·Kp·Ka·Gp(s)/(1 + GH(s)) en la 8.2.
 Kme sigue simbólico (sin fila en la Tabla 4). Las Figuras 2 y 3 quedan como están. El simulador no cambia: la 9.5 aclara que
 idealiza esa rama como una resta directa sobre el ruido. No volver a cambiar este modelo sin consultar: es el del profesor.
+
+Actualización (26/11/2026, 3): `simulacion_anc.py` ahora calcula la prealimentación como el diagrama del profesor: la señal del
+micrófono externo (`be = Kme·d`, con `Kme = ajuste/(Kp·Ka)`) se suma a la del interno antes del comparador, `e = R − (b + be)`
+y `u = Kp·e`. Antes se restaba aparte (`u += −ff·d/Ka`). Los resultados no cambian: comparado corrida por corrida contra la
+versión anterior (33 configuraciones), c y u coinciden salvo redondeo (≤ 4·10⁻¹² Pa); los 5 ensayos, la evidencia y
+`node web/test/comparar.js` dan lo mismo. Único cambio de comportamiento: con Kp = 0 la prealimentación ya no actúa.
+`paso()` devuelve además `be`. Etiquetas de la interfaz: "Error e = R − (b + bₑ)". `web/motor.js` no se tocó: la app web
+no tiene prealimentación. No se regeneró `evidencia/` ni `web/test/referencia_python.json` (solo cambiarían por redondeo y
+por la tipografía de las figuras). Falta en el informe: 9.5 (ya no es "una resta directa sobre el ruido") y 9.1 (e = r − (b + bₑ)).

@@ -13,7 +13,11 @@ Modelo (ver secciones 6.2 y 8 del informe):
     Proceso:   τ·dc/dt = -c + K·q(t - T)
     Medición:  b(t) = Km·c(t)
     Error:     e(t) = R - b(t) = -b(t)
-    Control:   u(t) = Kp·e(t) + u_ff(t)    (u_ff = rama de prealimentación)
+    Control:   u(t) = Kp·e(t)
+
+    Con prealimentación (micrófono externo, como en las Figuras 2 y 3 del informe):
+    Mic externo:  be(t) = Kme·de(t)        (se toma de = d; Kme ajustada: Kp·Ka·Kme = ajuste)
+    Error:        e(t) = R - [b(t) + be(t)]
 
 El parlante tiene un límite físico de tensión (saturación): cuando el lazo se
 vuelve inestable, la oscilación crece hasta ese límite y se sostiene. Es el
@@ -200,7 +204,7 @@ class LazoANC:
     # --- integración --------------------------------------------------------
     def paso(self, n):
         """Avanza n pasos de integración. Devuelve un dict de arreglos:
-        t, d (ruido total que llega), dm (perturbación manual), coff, c, b, e, u."""
+        t, d (ruido total que llega), dm (perturbación manual), coff, c, b, be, e, u."""
         t = self.t + DT * np.arange(n)
         amb = self.ruido * sum(a * np.sin(2 * np.pi * f * t) for f, a in TONOS)
         w = self.rng.normal(0, RUIDO_BANDA_ANCHA * 7, n)
@@ -208,22 +212,28 @@ class LazoANC:
         K_arr = np.where(sello, CALCE["malo"]["K"], self.K)
         a_arr = DT / np.where(sello, CALCE["malo"]["tau"], self.tau)
 
-        out = {k: np.empty(n) for k in ("d", "coff", "c", "b", "e", "u")}
+        out = {k: np.empty(n) for k in ("d", "coff", "c", "b", "be", "e", "u")}
         nT = int(round(min(max(self.T, 0.0), T_MAX_BUFFER) / DT))
         Kp, Ka, Km, umax = self.Kp, self.Ka, self.Km, self.u_max
         anc, pre, ff = self.anc, self.prealimentacion, self.ff_ajuste
+        # Rama del micrófono externo (prealimentación), como en las Figuras 2 y 3 del informe:
+        # su señal be = Kme·de se suma a la del micrófono interno antes del comparador.
+        # Kme es la ganancia de esa rama, ajustada para que cancele la fracción ff del ruido:
+        # Kp·Ka·Kme = ff  ->  Kme = ff / (Kp·Ka). Con Kp = 0 nada pasa por el controlador.
+        Kme = ff / (Kp * Ka) if (anc and pre and Kp > 0) else 0.0
         self.saturado = False
         for i in range(n):
             self.nb += 0.02 * (w[i] - self.nb)
             d = amb[i] + self.ruido * self.nb + dm[i]
             b = Km * self.c                       # realimentación [V]
-            e = 0.0 - b                           # error, referencia nula [V]
+            # Prealimentación ideal: usa la misma d que llega al oído y pasa por el
+            # mismo retardo que el anti-ruido. Con ff = 0.8 agrega 20·log(1/0.2) ≈ 14 dB.
+            # En un auricular real el micrófono externo tiene otro camino acústico.
+            be = Kme * d                          # micrófono externo [V] (de = d); 0 si está apagado
+            e = 0.0 - (b + be)                    # error, referencia nula [V]
             u = Kp * e if anc else 0.0            # ley de control proporcional [V]
-            if anc and pre:
-                # Prealimentación ideal: usa la misma d que llega al oído y pasa por el
-                # mismo retardo que el anti-ruido. Con ff = 0.8 agrega 20·log(1/0.2) ≈ 14 dB.
-                # En un auricular real el micrófono externo tiene otro camino acústico.
-                u += -ff * d / Ka                 # anticipa la perturbación
+            # Da lo mismo que la forma anterior, u = Kp·(−b) − ff·d/Ka (anticipa la perturbación),
+            # pero ahora el error y la salida de control siguen el diagrama señal por señal.
             if abs(u) > umax:
                 u = umax if u > 0 else -umax
                 self.saturado = True
@@ -237,7 +247,7 @@ class LazoANC:
             self.idx = (self.idx + 1) % self._nbuf
 
             out["d"][i] = d; out["coff"][i] = self.c_off; out["c"][i] = self.c
-            out["b"][i] = b; out["e"][i] = e; out["u"][i] = u
+            out["b"][i] = b; out["be"][i] = be; out["e"][i] = e; out["u"][i] = u
         self.t += DT * n
         # descarta perturbaciones ya terminadas
         self.perturbaciones = [p for p in self.perturbaciones if p["t1"] > self.t]
@@ -424,7 +434,7 @@ def construir_interfaz():
     zona_sat_inf = Rectangle((0, -U_MAX - 1e3), 1, 1e3, transform=ax_u.get_yaxis_transform(),
                              facecolor="#c0392b", alpha=0.12, lw=0, zorder=0)
     ax_u.add_patch(zona_sat_sup); ax_u.add_patch(zona_sat_inf)
-    l_e, = ax_e.plot([], [], color="#d08c2b", lw=1, label="Error e = R − b")
+    l_e, = ax_e.plot([], [], color="#d08c2b", lw=1, label="Error e = R − (b + bₑ)")
     ax_p.set_ylabel("Presión en el oído [Pa]")
     ax_u.set_ylabel("Salida de control [V]")
     ax_e.set_ylabel("Error [V]")
@@ -560,7 +570,7 @@ def construir_interfaz():
         ("Presión sin ANC", "c₀", "Pa"),
         ("Presión con ANC (respuesta)", "c", "Pa"),
         ("Realimentación (mic interno)", "b", "mV"),
-        ("Error  e = R − b", "e", "mV"),
+        ("Error  e = R − (b + bₑ)", "e", "mV"),
         ("Salida de control", "u", "V"),
         ("Presión del parlante", "Ka·u", "Pa"),
         # Valores eficaces: misma media ventana (últimos 10 ms) que la atenuación medida

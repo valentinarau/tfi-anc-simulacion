@@ -58,6 +58,11 @@ Si `python` no responde en Windows, usar `py` en su lugar.
   (`Kp ≥ Kp máx exacto`), no a partir de la señal simulada. Ambos coinciden en la práctica.
 - La prealimentación es ideal: usa la misma perturbación `d` y el mismo retardo que el anti-ruido,
   por lo que con un ajuste del 80 % agrega exactamente 20·log(1/0,2) ≈ 14 dB.
+- La rama del micrófono externo se calcula como en las Figuras 2 y 3 del informe: su señal
+  `be = Kme·d` se suma a la del micrófono interno antes del comparador, así que el error es
+  `e = R − (b + be)` y la salida de control es `u = Kp·e`. La ganancia `Kme` de esa rama se
+  ajusta sola para cancelar el porcentaje elegido (`Kp·Ka·Kme = ajuste`); por eso el porcentaje
+  no cambia al mover `Kp`. Con `Kp = 0` la prealimentación no actúa, porque pasa por el controlador.
 
 ## Demo web ("borrar el ruido")
 
