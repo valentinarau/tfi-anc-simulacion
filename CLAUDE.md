@@ -140,3 +140,13 @@ sobre las originales) subidas a Drive como TFI_ANC_figura2_bloques.png y TFI_ANC
 reemplazarlas a mano en el informe. Textos agregados: sección 4, Tabla 2 (Elemento de medición), 6.4 (dₑ(t), bₑ(t),
 e(t) con ME), Tabla 6 (fila Hₑ(s) = Kme), 8.4 (la rama de ME no cierra lazo: no cambia estabilidad) y 9.5 (paréntesis).
 Kme queda simbólico.
+
+Actualización (26/11/2026): en el informe, la lista de señales de la 6.4 pasó a ser la Tabla 5 ("Señales del lazo"), así que
+las tablas siguientes se corrieron un número: leyes de control = Tabla 6, transferencias = Tabla 7, atenuación por
+frecuencia = Tabla 8, Routh = Tabla 9, ventana de sintonía = Tabla 10, ruidos urbanos = Tabla 11, interfaz = Tabla 12,
+síntesis de ensayos = Tabla 13. Actualizadas las citas en `generar_evidencia.py` y en los README de `evidencia/`
+(solo el número de tabla; los resultados no cambian). La sección 6 pasó a llamarse "Alcance y estructura del sistema".
+Las menciones a tablas en las actualizaciones anteriores de este archivo usan la numeración vieja.
+En revisión: el 26/11 el texto del informe pasó a describir la prealimentación como una rama que se suma a la salida del
+controlador (como en `simulacion_anc.py`); eso difiere del boceto del profesor (ME sumado antes del comparador,
+actualización del 14/11, 2). Falta decidir cuál queda.
