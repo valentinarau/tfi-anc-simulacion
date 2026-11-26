@@ -87,9 +87,3 @@ Agregar algo acá solo si otra sesión lo necesita para no equivocarse; si una d
   Euler suma medio paso de retardo. No es un error.
 - En la app web, la "almohadilla pasiva" (pasabajos de 1 kHz para micrófono y sample) es una suposición de la app, no del informe.
 - `web/referencia/` es el prototipo de diseño: no es ejecutable y no se edita.
-
-## Pendiente
-
-- Informe: actualizar el índice y sacar los resaltados antes de exportar a PDF.
-- Confirmar origen y licencia de las 8 fotos de `web/img/` y de los audios de `samples/` (ver `samples/README.md`).
-- Probar el micrófono real de la app con auriculares.
