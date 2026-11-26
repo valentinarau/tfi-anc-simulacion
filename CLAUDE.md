@@ -150,3 +150,7 @@ Las menciones a tablas en las actualizaciones anteriores de este archivo usan la
 En revisión: el 26/11 el texto del informe pasó a describir la prealimentación como una rama que se suma a la salida del
 controlador (como en `simulacion_anc.py`); eso difiere del boceto del profesor (ME sumado antes del comparador,
 actualización del 14/11, 2). Falta decidir cuál queda.
+Resuelto (26/11/2026, 2): el informe volvió al modelo del boceto del profesor. El ME suma su señal a la del micrófono interno
+antes del comparador: e(t) = r(t) − [b(t) + bₑ(t)], u(t) = Kp·e(t), y C(s)/De(s) = −Kme·Kp·Ka·Gp(s)/(1 + GH(s)) en la 8.2.
+Kme sigue simbólico (sin fila en la Tabla 4). Las Figuras 2 y 3 quedan como están. El simulador no cambia: la 9.5 aclara que
+idealiza esa rama como una resta directa sobre el ruido. No volver a cambiar este modelo sin consultar: es el del profesor.
