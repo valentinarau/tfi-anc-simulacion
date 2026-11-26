@@ -163,3 +163,17 @@ versión anterior (33 configuraciones), c y u coinciden salvo redondeo (≤ 4·1
 `paso()` devuelve además `be`. Etiquetas de la interfaz: "Error e = R − (b + bₑ)". `web/motor.js` no se tocó: la app web
 no tiene prealimentación. No se regeneró `evidencia/` ni `web/test/referencia_python.json` (solo cambiarían por redondeo y
 por la tipografía de las figuras). Falta en el informe: 9.5 (ya no es "una resta directa sobre el ruido") y 9.1 (e = r − (b + bₑ)).
+
+Actualización (26/11/2026, 4): retoques a las Figuras 2 y 3 del informe (solo rótulos; bloques, flechas y puntos suma siguen
+siendo los del boceto del profesor). Figura 2: "Perturbación: ruido ambiente que atraviesa la barrera" y "Ruido ambiente
+(exterior, antes de la barrera)", para distinguir d(t) de dₑ(t). Figura 3: "Perturbación [Pa]: ruido ambiente que atraviesa la
+barrera física" (se sacó "fuga por mal calce": según la 6.2 cambia K y τ, no suma presión), el "+" inferior del punto suma de
+perturbaciones pasó al lado de la flecha del actuador, Carga = "sistema auditivo" y "(exterior, antes de la barrera)".
+Los PNG nuevos se entregaron por chat (TFI_ANC_figura2_bloques_v2.png y TFI_ANC_figura3_bloques_unidades_v2.png); los de Drive
+siguen siendo los anteriores. Al 26/11 a las 18 h la Figura 3 ya estaba reemplazada en el informe y la Figura 2 seguía con la
+versión anterior. Se decidió no indicar señales analógicas/digitales en la Figura 3: lo cubren la 6.4 y la Tabla 5.
+Ecuaciones: la 3 y la 10 ya están corregidas en el informe (θo con letra o, Π en el denominador, + después de s²); ahora son 14
+porque se agregó la de C(s)/De(s) en la 8.2. Citas: revisadas; la consigna pide solo la lista de bibliografía y el informe no
+usa marcas [n] (igual que el TFI de silos corregido por el profesor). Sin fuente nombrada en la frase, aunque sí en la
+bibliografía: 70 a 75 dB sobre avenidas (8.7), 375 µs de Bluetooth (10.3), frecuencias de la Tabla 11 y umbral de dolor (6.6).
+Pendiente del informe: actualizar el índice y sacar los resaltados amarillos antes de exportar a PDF.
