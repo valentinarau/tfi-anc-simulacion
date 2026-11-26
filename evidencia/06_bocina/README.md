@@ -24,7 +24,7 @@ Lo que limita el resultado es la frecuencia de cada armónico, no la forma en el
 
 ## 3. Qué predice el informe
 
-- **Tabla 10 (sección 8.7):** con Kp = 300 y buen calce, la bocina se atenúa 18 dB en la
+- **Tabla 11 (sección 8.7):** con Kp = 300 y buen calce, la bocina se atenúa 18 dB en la
   fundamental y 16,7 dB en total; no cumple los 20 dB.
 - **Sección 8.7:** como el lazo se asienta en 0,43 ms, la atenúa casi igual desde el comienzo.
   El límite es la frecuencia: la fundamental baja 18 dB, pero los armónicos agudos casi nada.

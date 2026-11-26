@@ -353,7 +353,7 @@ el caso en que la aproximación de Padé daría el lazo por estable cuando no lo
 - **Sección 8.6:** el caso Kp = 480 muestra por qué la ventana se evalúa con el peor calce:
   Padé lo daría por estable (Kp máx Padé {num(lim_malo['kp_max_pade'], 0)}), pero con mal calce supera el
   límite exacto de 447 y el lazo oscila a unos 6,4 kHz. Con buen calce el límite exacto es
-  {num(lim_bueno['kp_max_exacto'], 0)} (Tabla 9), así que antes de aflojarse el lazo es estable.
+  {num(lim_bueno['kp_max_exacto'], 0)} (Tabla 10), así que antes de aflojarse el lazo es estable.
 - **Sección 6.7:** la oscilación y la saturación sostenida son falla; la pérdida de sello es
   perturbación si es momentánea y falla si persiste.
 - **Sección 9.4** reporta 28,6 dB con buen calce y, al aflojarse, oscilación con la salida
@@ -600,12 +600,12 @@ def caso_6(resumen):
     est_b = float(np.mean([m["establecido"] for _, m in corridas["bueno"]]))
     umax_b = max(m["umax"] for _, m in corridas["bueno"])
 
-    # Armónicos: fundamental 18 dB (Tabla 10); los agudos casi nada (8.7; desde el 5.º, menos
+    # Armónicos: fundamental 18 dB (Tabla 11); los agudos casi nada (8.7; desde el 5.º, menos
     # de 5 dB); por encima de unos 2,9 kHz el lazo amplifica (8.3): el 6.º (2,52 kHz) todavía
     # atenúa y el 7.º (2,94 kHz) y el 8.º ya amplifican.
     arm_ok = (round(arm[0]) == 18 and all(a < 5 for a in arm[4:])
               and arm[5] > 0 and arm[6] < 0 and arm[7] < 0)
-    # Total con buen calce según la Tabla 10: 16,7 dB.
+    # Total con buen calce según la Tabla 11: 16,7 dB.
     informe_ok = round(est_b, 1) == 16.7
     ok = filas_ok and arm_ok and informe_ok
     bb = atenuacion_banda_baja(Kp)
@@ -672,7 +672,7 @@ Lo que limita el resultado es la frecuencia de cada armónico, no la forma en el
 
 ## 3. Qué predice el informe
 
-- **Tabla 10 (sección 8.7):** con Kp = 300 y buen calce, la bocina se atenúa 18 dB en la
+- **Tabla 11 (sección 8.7):** con Kp = 300 y buen calce, la bocina se atenúa 18 dB en la
   fundamental y 16,7 dB en total; no cumple los 20 dB.
 - **Sección 8.7:** como el lazo se asienta en 0,43 ms, la atenúa casi igual desde el comienzo.
   El límite es la frecuencia: la fundamental baja 18 dB, pero los armónicos agudos casi nada.
@@ -709,7 +709,7 @@ almohadilla.
 """
     fila_indice = [dict(
         caso="6. Bocina de 420 Hz, 100 dB SPL", seccion="8.3, 8.7",
-        predice="18 dB en la fundamental, 16,7 dB en total (Tabla 10); casi igual desde el comienzo, "
+        predice="18 dB en la fundamental, 16,7 dB en total (Tabla 11); casi igual desde el comienzo, "
                 "agudos casi nada, sin saturar (8.7); amplifica sobre 2,9 kHz (8.3)",
         dio=f"Subida {num(min(sub_b))} a {num(max(sub_b))} dB, establecido {num(est_b)} dB; "
             f"fundamental {num(arm[0])} dB, 5.º {num(arm[4])} dB, 7.º {num(arm[6])} dB; u máx. {num(umax_b, 2)} V",

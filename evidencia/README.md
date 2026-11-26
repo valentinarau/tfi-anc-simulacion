@@ -26,7 +26,7 @@ si la simulación da lo que predice el informe, también cuando lo predicho es u
 | 3. Pérdida de sello: después de aflojarse | 6.7, 8.6, 9.4 | Kp = 480 > 447: oscila (~6,4 kHz) y satura | Oscila a 6,35 kHz; saturado el 37 % del tiempo | Falla (oscila y satura). Buscada por el ensayo | Sí |
 | 4. Híbrido: con y sin prealimentación | 9.5 | Mejora de 14,0 dB; 9.5 reporta 24,7 → 38,7 dB | 24,7 → 38,7 dB (+14,0 dB) | Error admisible | Sí |
 | 5. Escalón de 0,5 Pa | 8.3, 8.6, 9.6 | c_ss = K·A/(1+KL) = 0,0211 Pa; sobrepico 41,5 %, asentamiento 0,43 ms | c_ss = 0,0211 Pa (4,2 % del escalón); sobrepico 41,5 %, 0,43 ms | Error admisible | Sí |
-| 6. Bocina de 420 Hz, 100 dB SPL | 8.3, 8.7 | 18 dB en la fundamental, 16,7 dB en total (Tabla 10); casi igual desde el comienzo, agudos casi nada, sin saturar (8.7); amplifica sobre 2,9 kHz (8.3) | Subida 15,8 a 17,5 dB, establecido 16,7 dB; fundamental 18,4 dB, 5.º 3,8 dB, 7.º -0,3 dB; u máx. 0,87 V | Error admisible | Sí |
+| 6. Bocina de 420 Hz, 100 dB SPL | 8.3, 8.7 | 18 dB en la fundamental, 16,7 dB en total (Tabla 11); casi igual desde el comienzo, agudos casi nada, sin saturar (8.7); amplifica sobre 2,9 kHz (8.3) | Subida 15,8 a 17,5 dB, establecido 16,7 dB; fundamental 18,4 dB, 5.º 3,8 dB, 7.º -0,3 dB; u máx. 0,87 V | Error admisible | Sí |
 | 7. App web: motor JS contra Python | 8.3, 8.4, 8.7, 9.6 | La app usa el mismo lazo: misma atenuación (±0,5 dB), Kp máx 528 y 447 (±1 %), c_ss 0,0211 Pa | Tránsito 25,6/22,2 dB, bocina 16,7/17,3 dB, colectivo 26,9/23,1 dB (buen/mal calce), iguales en JS y Python; Kp máx 527,9 y 447,0; c_ss 0,0211 Pa | — (comprobación de software) | Sí |
 
 Hay 2 situaciones de falla y son buscadas: los ensayos 2 y 3 existen para provocarlas.
